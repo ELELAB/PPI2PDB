@@ -1,7 +1,7 @@
 # Mentha2PDB
 
 #Requirements
-python3 use module load python/3.7/modulefile
+python3 (on local server: use module load python/3.7/modulefile)
 pypdb v2.1
 pandas
 
