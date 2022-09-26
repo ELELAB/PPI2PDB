@@ -7,12 +7,13 @@ pypdb v2.2 (only version 2.2 works since it has been recently updated to support
 pandas <br />
 
 #Usage
-python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uniprot_ID.txt -s 0.2 -o out.csv
--i mentha database to analyze
--t input file with list of the uniprot IDs of the target proteins
--s threshold of mentha score for filtering (i.e., remove all the entries with mentha score below the threshold)
--o name output file
+
+python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uniprot_ID.txt -s 0.2 -o out.csv <br />
+-i mentha database to analyze <br />
+-t input file with list of the uniprot IDs of the target proteins <br />
+-s threshold of mentha score for filtering (i.e., remove all the entries with mentha score below the threshold) <br />
+-o name output file <br />
 
 #Example
-run the script in example as
-python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uniprot_ID.txt -s 0.2 -o out.csv
+run the script in example as <br />
+python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uniprot_ID.txt -s 0.2 -o out.csv <br />
