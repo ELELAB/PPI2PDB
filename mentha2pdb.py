@@ -22,7 +22,7 @@ def main(argv):
     parser.add_argument('-i','--i', help='mentha database file')
     parser.add_argument('-t','--t', help='File with target uniprots')
     parser.add_argument('-s','--s', type=Decimal, help='Cutoff score')
-    parser.add_argument('-o','--o', help='Output name')       
+    parser.add_argument('-o','--o', nargs='?',const='dataframe.csv',default='dataframe.csv',help='Output name') 
     parser.add_argument('-f', '--filter', action='store_true')
     
     args = parser.parse_args()
@@ -165,7 +165,7 @@ def main(argv):
 
     
     print('\n')
-    dataframeOut.to_csv(args.o, index=False, quoting=csv.QUOTE_ALL)
+    dataframeOut.to_csv(args.o, index=False, quoting=csv.QUOTE_NONE)
                         
             
 def get_experiment(pdb):
