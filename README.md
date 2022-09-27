@@ -8,12 +8,14 @@ pandas <br />
 
 #Usage
 
-python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uniprot_ID.txt -s 0.2 -o out.csv <br />
+python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p <br />
 -i mentha database to analyze <br />
 -t input file with list of the uniprot IDs of the target proteins <br />
 -s threshold of mentha score for filtering (i.e., remove all the entries with mentha score below the threshold) <br />
 -o name output file <br />
+-p include in the ouput the PMID of the relevant publications related to the interaction <br />
+-x generate a single csv output file per each target uniprot ID named dataframe_<target_uniprot_ID>.csv (this option overrides option -o) <br />
 
 #Example
 run the script in example as <br />
-python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uniprot_ID.txt -s 0.2 -o out.csv <br />
+python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p  <br />
