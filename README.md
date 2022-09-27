@@ -15,7 +15,8 @@ python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uni
 -o name output file <br />
 -p include in the ouput the PMID of the relevant publications related to the interaction <br />
 -x generate a single csv output file per each target uniprot ID named dataframe_<target_uniprot_ID>.csv (this option overrides option -o) <br />
+-a  have in output input files for AlphaFold_multimer <br />
 
 #Example
 run the script in example as <br />
-python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p  <br />
+python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -a <br />
