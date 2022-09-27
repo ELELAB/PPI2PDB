@@ -16,6 +16,9 @@ import warnings
 import csv
 
 
+
+
+
 def main(argv):
     warnings.filterwarnings("ignore")
     parser = argparse.ArgumentParser()
@@ -26,6 +29,7 @@ def main(argv):
     parser.add_argument('-f', '--filter', action='store_true')
     parser.add_argument('-p', '--p', action='store_true', help='option to add PMID column to output')
     parser.add_argument('-x', '--x', action='store_true', help='option to have one csv output file per target uniprot ID')
+    parser.add_argument('-a', '--a', action='store_true', help='option to have in output the input files for AF_multimer')
 
     args = parser.parse_args()
 
@@ -71,7 +75,7 @@ def main(argv):
             uniprotData = uniprotData.reset_index()  # make sure indexes pair with number of rows
 
             targetQueryResult = pypdb.Query(uniprot).search(num_attempts=10, sleep_time=0.9)
-            print('Target {}'.format(uniprot))
+            print('Target {}                                          '.format(uniprot))
             for index, row in uniprotData.iterrows():
                 targetProtein = ''
                 interactorProtein = ''
@@ -181,8 +185,14 @@ def main(argv):
                 else:
                     dataframeOut.to_csv('dataframe_' + uniprot + '.csv', index=False, quoting=csv.QUOTE_NONE)
                     print('>> Out for uniprot {} -> {}'.format(uniprot, 'dataframe_' + uniprot + '.csv'))
+
+                #if option -a is selected we have to create folder and subfolders for input.fasta files
+                if args.a:
+                    make_target_interactor_sequence_files(dataframeOut)
             else:
                 continue
+
+
 
     if not args.x:
         if args.p:
@@ -190,7 +200,56 @@ def main(argv):
         dataframeOut.to_csv(args.o, index=False, quoting=csv.QUOTE_NONE)
         print('>> Out total (no splitted output option -x) selected -> {}'.format(args.o))
 
+        if args.a:
+            make_target_interactor_sequence_files(dataframeOut)
+
     print('\nFinished')
+
+def make_target_interactor_sequence_files(dataframeOut):
+
+    #get target list so we cover -x option (splitted outs) and normal (with all the targets in the same dataframe
+    target_list = list(dict.fromkeys(dataframeOut['target uniprot id'].tolist()))
+
+    from pathlib import Path
+    Path("inputs_afmulti").mkdir(parents=True, exist_ok=True)
+
+    url = 'https://rest.uniprot.org/uniref/search?query=uniprot_id:'
+
+    for target in target_list:
+        print('>>Making folders/files for target {}                   '.format(target))
+
+        #filter dataframe
+        target_data = dataframeOut[(dataframeOut['target uniprot id'] == target)]
+        interactor_uniprot_ids = target_data['interactor uniprot id'].to_list()
+        interactor_genes = target_data['interactor uniprot gene'].to_list()
+
+        #get first gene value -> same target = all the same
+        target_uniprot_gene = target_data['target uniprot gene'].values[0]
+
+        #get target sequence
+        result = make_request(url, 'get', target)
+        target_sequence = result['results'][0]['representativeMember']['sequence']['value']
+
+        #make dir for target
+        Path("inputs_afmulti/"+target_uniprot_gene).mkdir(parents=True, exist_ok=True)
+
+        for interactor_id, interactor_gene in zip(interactor_uniprot_ids, interactor_genes):
+            #for every interactor make request make dir and then build file
+            result = make_request(url, 'get', interactor_id)
+            interactor_sequence = result['results'][0]['representativeMember']['sequence']['value']
+
+            # make dir for interactor
+            Path("inputs_afmulti/" + target_uniprot_gene+'/'+interactor_gene).mkdir(parents=True, exist_ok=True)
+
+            print('>>Made folder {}                     '.format("inputs_afmulti/" + target_uniprot_gene+'/'+interactor_gene),end='\r')
+
+            with open("inputs_afmulti/" + target_uniprot_gene+'/'+interactor_gene+'/input.fasta', 'w+') as alpha_file:
+                alpha_file.write('>'+target_uniprot_gene+'\n')
+                alpha_file.write(target_sequence+'\n')
+                alpha_file.write('>'+interactor_gene+'\n')
+                alpha_file.write(interactor_sequence+'\n')
+
+    return 0
 
 def pmid_adder(data, dataframe_out):
     # if p option selected -> PMID search and add
@@ -399,4 +458,3 @@ def make_request(url, mode, pdb_id):
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
