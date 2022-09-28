@@ -13,7 +13,7 @@ python mentha2pdb.py -i /data/databases/mentha-20210301/2021-03-01 -t target_uni
 -t input file with list of the uniprot IDs of the target proteins <br />
 -s threshold of mentha score for filtering (i.e., remove all the entries with mentha score below the threshold) <br />
 -o name output file <br />
--p include in the ouput the PMID of the relevant publications related to the interaction <br />
+-p include in the ouput the PMID of the relevant publications related to the interaction. The "unassigned<#code>" are broken publication annotations in the Mentha database generally coming from missing annotations in IntAct <br />
 -x generate a single csv output file per each target uniprot ID named dataframe_<target_uniprot_ID>.csv (this option overrides option -o) <br />
 -a  have in output input files for AlphaFold_multimer <br />
 
