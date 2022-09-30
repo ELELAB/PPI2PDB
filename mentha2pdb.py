@@ -28,8 +28,8 @@ def main(argv):
     parser.add_argument('-o', '--o', nargs='?', const='dataframe.csv', default='dataframe.csv', help='Output name')
     parser.add_argument('-f', '--filter', action='store_true')
     parser.add_argument('-p', '--p', action='store_true', help='option to add PMID column to output')
-    parser.add_argument('-x', '--x', action='store_true', help='option to have one csv output file per target uniprot ID')
-    parser.add_argument('-a', '--a', action='store_true', help='option to have in output the input files for AF_multimer')
+    parser.add_argument('-x', '--x', action='store_true', help='option to have 1 csv output file per target uniprot ID')
+    parser.add_argument('-a', '--a', action='store_true', help='option to have inputs_afmulti folder with subfolders and input.fasta files')
 
     args = parser.parse_args()
 
@@ -206,48 +206,62 @@ def main(argv):
     print('\nFinished')
 
 def make_target_interactor_sequence_files(dataframeOut):
+    with open('log.txt','w+') as log_file:
+       #get target list so we cover -x option (splitted outs) and normal (with all the targets in the same dataframe
+       target_list = list(dict.fromkeys(dataframeOut['target uniprot id'].tolist()))
 
-    #get target list so we cover -x option (splitted outs) and normal (with all the targets in the same dataframe
-    target_list = list(dict.fromkeys(dataframeOut['target uniprot id'].tolist()))
+       from pathlib import Path
+       Path("inputs_afmulti").mkdir(parents=True, exist_ok=True)
 
-    from pathlib import Path
-    Path("inputs_afmulti").mkdir(parents=True, exist_ok=True)
+       url = 'https://rest.uniprot.org/uniref/search?query=uniprot_id:'
 
-    url = 'https://rest.uniprot.org/uniref/search?query=uniprot_id:'
+       for target in target_list:
+           print('>>Making folders/files for target {}                   '.format(target))
 
-    for target in target_list:
-        print('>>Making folders/files for target {}                   '.format(target))
+           #filter dataframe
+           target_data = dataframeOut[(dataframeOut['target uniprot id'] == target)]
+           interactor_uniprot_ids = target_data['interactor uniprot id'].to_list()
+           interactor_genes = target_data['interactor uniprot gene'].to_list()
 
-        #filter dataframe
-        target_data = dataframeOut[(dataframeOut['target uniprot id'] == target)]
-        interactor_uniprot_ids = target_data['interactor uniprot id'].to_list()
-        interactor_genes = target_data['interactor uniprot gene'].to_list()
+           #get first gene value -> same target = all the same
+           target_uniprot_gene = target_data['target uniprot gene'].values[0]
 
-        #get first gene value -> same target = all the same
-        target_uniprot_gene = target_data['target uniprot gene'].values[0]
+           #get target sequence
+           result = make_request(url, 'get', target)
 
-        #get target sequence
-        result = make_request(url, 'get', target)
-        target_sequence = result['results'][0]['representativeMember']['sequence']['value']
+           target_sequence = result['results'][0]['representativeMember']['sequence']['value']
 
-        #make dir for target
-        Path("inputs_afmulti/"+target_uniprot_gene).mkdir(parents=True, exist_ok=True)
 
-        for interactor_id, interactor_gene in zip(interactor_uniprot_ids, interactor_genes):
-            #for every interactor make request make dir and then build file
-            result = make_request(url, 'get', interactor_id)
-            interactor_sequence = result['results'][0]['representativeMember']['sequence']['value']
+           #fix for uniprot genes of type U2AF1L5 {ECO:0000312|HGNC:HGNC:51830} -> error creating folder
+           if ' ' in target_uniprot_gene:
+               target_uniprot_gene = target_uniprot_gene.split(' ')[0].rstrip()
+           if '{' in target_uniprot_gene:
+               target_uniprot_gene = target_uniprot_gene.split('{')[0].rstrip()
 
-            # make dir for interactor
-            Path("inputs_afmulti/" + target_uniprot_gene+'/'+interactor_gene).mkdir(parents=True, exist_ok=True)
+           #make dir for target
+           Path("inputs_afmulti/"+target_uniprot_gene).mkdir(parents=True, exist_ok=True)
 
-            print('>>Made folder {}                     '.format("inputs_afmulti/" + target_uniprot_gene+'/'+interactor_gene),end='\r')
+           for interactor_id, interactor_gene in zip(interactor_uniprot_ids, interactor_genes):
+               #for every interactor make request make dir and then build file
+               result = make_request(url, 'get', interactor_id)
 
-            with open("inputs_afmulti/" + target_uniprot_gene+'/'+interactor_gene+'/input.fasta', 'w+') as alpha_file:
-                alpha_file.write('>'+target_uniprot_gene+'\n')
-                alpha_file.write(target_sequence+'\n')
-                alpha_file.write('>'+interactor_gene+'\n')
-                alpha_file.write(interactor_sequence+'\n')
+               if result['results'] != []:
+                   interactor_sequence = result['results'][0]['representativeMember']['sequence']['value']
+               else:
+                   print('***INTERACTOR {} of target {} returned NO results, skipping folder/sequence creation'.format(interactor_id,target))
+                   log_file.write('***INTERACTOR {} of target {} returned NO results, skipping folder/sequence creation \n'.format(interactor_id,target))
+                   continue
+
+               # make dir for interactor
+               Path("inputs_afmulti/" + target_uniprot_gene+'/'+interactor_gene).mkdir(parents=True, exist_ok=True)
+
+               print('>>Made folder {}                     '.format("inputs_afmulti/" + target_uniprot_gene+'/'+interactor_gene),end='\r')
+
+               with open("inputs_afmulti/" + target_uniprot_gene+'/'+interactor_gene+'/input.fasta', 'w+') as alpha_file:
+                   alpha_file.write('>'+target_uniprot_gene+'\n')
+                   alpha_file.write(target_sequence+'\n')
+                   alpha_file.write('>'+interactor_gene+'\n')
+                   alpha_file.write(interactor_sequence+'\n')
 
     return 0
 
