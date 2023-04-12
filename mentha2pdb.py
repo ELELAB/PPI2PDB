@@ -1,6 +1,7 @@
     # -*- coding: utf-8 -*-
 """
-Created on Thu May 12 09:14:52 2022
+Created on Thu May 12 09:14:52 2022 v 1.0
+updated April 12 2023 v 1.1
 
 @author: Matteo
 """
@@ -179,11 +180,13 @@ def main(argv):
                     dataframeOutx = pmid_adder(data, dataframeOut)
                     # replace chars that will break to_csv
                     dataframeOutx.replace({',': '_'}, regex=True, inplace=True)
+                    dataframeOutx.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
                     dataframeOutx.to_csv('dataframe_' + uniprot + '.csv', index=False, quoting=csv.QUOTE_NONE)
                     print('>> Out for uniprot {} -> {}'.format(uniprot, 'dataframe_' + uniprot + '.csv'))
                 else:
                     # replace chars that will break to_csv
                     dataframeOut.replace({',': '_'}, regex=True, inplace=True)
+                    dataframeOut.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
                     dataframeOut.to_csv('dataframe_' + uniprot + '.csv', index=False, quoting=csv.QUOTE_NONE)
                     print('>> Out for uniprot {} -> {}'.format(uniprot, 'dataframe_' + uniprot + '.csv'))
 
@@ -198,6 +201,7 @@ def main(argv):
             dataframeOut = pmid_adder(data, dataframeOut)
         #replace chars that will break to_csv
         dataframeOut.replace({',': '_'}, regex=True, inplace=True)
+        dataframeOut.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
         dataframeOut.to_csv(args.o, index=False, quoting=csv.QUOTE_NONE)
         print('>> Out total (no splitted output option -x) selected -> {}'.format(args.o))
 
