@@ -1,6 +1,6 @@
     # -*- coding: utf-8 -*-
 """
-Created on Thu May 12 09:14:52 2022 v 1.0
+Created on Thu May 12 09:14:52 2022
 updated April 12 2023 v 1.1
 
 @author: Matteo
@@ -180,13 +180,17 @@ def main(argv):
                     dataframeOutx = pmid_adder(data, dataframeOut)
                     # replace chars that will break to_csv
                     dataframeOutx.replace({',': '_'}, regex=True, inplace=True)
+
                     dataframeOutx.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+
                     dataframeOutx.to_csv('dataframe_' + uniprot + '.csv', index=False, quoting=csv.QUOTE_NONE)
                     print('>> Out for uniprot {} -> {}'.format(uniprot, 'dataframe_' + uniprot + '.csv'))
                 else:
                     # replace chars that will break to_csv
                     dataframeOut.replace({',': '_'}, regex=True, inplace=True)
+
                     dataframeOut.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+
                     dataframeOut.to_csv('dataframe_' + uniprot + '.csv', index=False, quoting=csv.QUOTE_NONE)
                     print('>> Out for uniprot {} -> {}'.format(uniprot, 'dataframe_' + uniprot + '.csv'))
 
@@ -201,7 +205,9 @@ def main(argv):
             dataframeOut = pmid_adder(data, dataframeOut)
         #replace chars that will break to_csv
         dataframeOut.replace({',': '_'}, regex=True, inplace=True)
+
         dataframeOut.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+
         dataframeOut.to_csv(args.o, index=False, quoting=csv.QUOTE_NONE)
         print('>> Out total (no splitted output option -x) selected -> {}'.format(args.o))
 
@@ -235,7 +241,17 @@ def make_target_interactor_sequence_files(dataframeOut):
             # get target sequence
             result = make_request(url, 'get', target)
 
-            target_sequence = result['results'][0]['representativeMember']['sequence']['value']
+            target_sequence = ''
+
+            ##################################CHOSE RIGHT RESULT : Homo sapiens (Human) in organism name and target in id
+            for res in result['results']:
+                if target in res['id'] and res['representativeMember']['organismName'] == 'Homo sapiens (Human)':
+                    target_sequence = res['representativeMember']['sequence']['value']
+                    break
+                else:
+                    print(f"result discarded cause {target} not in {res['id']} \n\t or \n\t {res['representativeMember']['organismName']} is not Homo sapiens (Human)")
+
+
 
             # fix for uniprot genes of type U2AF1L5 {ECO:0000312|HGNC:HGNC:51830} -> error creating folder
             # covering no space case U2AF1L5{ECO:0000312|HGNC:HGNC:51830} and space case U2AF1L5 {ECO:0000312|HGNC:HGNC:51830}
@@ -250,9 +266,19 @@ def make_target_interactor_sequence_files(dataframeOut):
             for interactor_id, interactor_gene in zip(interactor_uniprot_ids, interactor_genes):
                 # for every interactor make request make dir and then build file
                 result = make_request(url, 'get', interactor_id)
-
+                interactor_sequence = ''
                 if result['results'] != []:
-                    interactor_sequence = result['results'][0]['representativeMember']['sequence']['value']
+                    ##################################CHOSE RIGHT RESULT : Homo sapiens (Human) in organism name and target in id
+                    interactor_sequence = ''
+                    for res in result['results']:
+                        if interactor_id in res['id'] and res['representativeMember']['organismName'] == 'Homo sapiens (Human)':
+                            interactor_sequence = res['representativeMember']['sequence']['value']
+                            break
+                        else:
+                            print(f"result discarded cause "
+                                  f"{interactor_id} not in {res['id']} \n\t "
+                                  f"or \n\t "
+                                  f"{res['representativeMember']['organismName']} is not Homo sapiens (Human)")
                 else:
                     print('***INTERACTOR {} of target {} returned NO results, skipping folder/sequence creation'.format(
                         interactor_id, target))
