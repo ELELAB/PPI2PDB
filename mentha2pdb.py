@@ -1,14 +1,17 @@
-    # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Created on Thu May 12 09:14:52 2022
-updated April 12 2023 v 1.1
+updated June 2023 v 1.2
 
 @author: Matteo
 """
 
+
 import sys
 import argparse
+import time
 from decimal import Decimal
+import numpy as np
 import pandas as pd
 import pypdb
 import re
@@ -17,293 +20,89 @@ import warnings
 import csv
 
 
-def main(argv):
-    warnings.filterwarnings("ignore")
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--i', help='mentha database file')
-    parser.add_argument('-t', '--t', help='File with target uniprots')
-    parser.add_argument('-s', '--s', type=Decimal, help='Cutoff score')
-    parser.add_argument('-o', '--o', nargs='?', const='dataframe.csv', default='dataframe.csv', help='Output name')
-    parser.add_argument('-f', '--filter', action='store_true')
-    parser.add_argument('-p', '--p', action='store_true', help='option to add PMID column to output')
-    parser.add_argument('-x', '--x', action='store_true', help='option to have 1 csv output file per target uniprot ID')
-    parser.add_argument('-a', '--a', action='store_true', help='option to have inputs_afmulti folder with subfolders and input.fasta files')
+def make_target_interactor_sequence_files(dataframe_out):
 
-    args = parser.parse_args()
+    # get target list so we cover -x option (splitted outs) and normal (with all the targets in the same dataframe
+    target_list = list(dict.fromkeys(dataframe_out['target uniprot id'].tolist()))
 
-    filterSameProteinInteraction = False
+    from pathlib import Path
+    Path("inputs_afmulti").mkdir(parents=True, exist_ok=True)
 
-    if args.filter:
-        filterSameProteinInteraction = True
+    url = 'https://rest.uniprot.org/uniref/search?query=uniprot_id:'
 
-    args = parser.parse_args()
+    for target in target_list:
+        print('>>Making folders/files for target {}                   '.format(target))
 
-    # read data with pandas
-    data = pd.read_csv(args.i, sep=';', converters={'Score': Decimal})
+        # filter dataframe
+        target_data = dataframe_out[(dataframe_out['target uniprot id'] == target)]
+        interactor_uniprot_ids = target_data['interactor uniprot id'].to_list()
+        interactor_genes = target_data['interactor uniprot gene'].to_list()
 
-    # filtering for taxon.A = 9606 AND taxon.B = 9606 AND score >= cutoff (args.s)
-    data = data[(data['Taxon A'] == 9606) & (data['Taxon B'] == 9606) & (data['Score'] >= args.s)]
+        # get first gene value -> same target = all the same
+        target_uniprot_gene = target_data['target uniprot gene'].values[0]
 
-    dataframeOut = pd.DataFrame(columns=['target uniprot id', 'target uniprot gene',  # 2 -> from csv
-                                         'interactor uniprot id', 'interactor uniprot gene',  # 2 -> from csv
-                                         'mentha score',  # 1 -> from csv
-                                         'PDB id',  # 1 -> from pypdb lib
-                                         'fusion',  # 1 -> from summary request
-                                         'target chain id', 'target starting residue', 'target ending residue',
-                                         # 3 -> from mappings request
-                                         'interactor chain id', 'interactor starting residue',
-                                         'interactor ending residue',  # 3 -> from mappings request
-                                         'other interactors',  # 1 -> from mappings request
-                                         'method',  # 1 -> from summary request
-                                         'resolution',  # 1 -> from experiment request
-                                         'dna chains', 'num ligands'])  # 2 -> from summary request
-    # -----------------------------
-    # 18 columns total
+        # get target sequence
+        result = make_request(url, 'get', target)
 
-    # open uniprot target file and get lines
-    with open(args.t, 'r') as uniprotTargets:
-        for uniprot in uniprotTargets:
-            if args.x:
-                dataframeOut = dataframeOut[0:0]
-            uniprot = uniprot.rstrip()
+        target_sequence = ''
 
-            # get data where protein A or protein b matches uniprot selected
-            uniprotData = data[(data['Protein A'] == uniprot) | (data['Protein B'] == uniprot)]
-
-            uniprotData = uniprotData.reset_index()  # make sure indexes pair with number of rows
-
-            targetQueryResult = pypdb.Query(uniprot).search(num_attempts=10, sleep_time=0.9)
-            print('Target {}                                          '.format(uniprot))
-            for index, row in uniprotData.iterrows():
-                targetProtein = ''
-                interactorProtein = ''
-                targetGene = ''
-                interactorGene = ''
-                score = Decimal('0')
-                # list that will later added to dataframe out
-                outRow = []
-
-                if row['Protein A'] == uniprot:
-                    targetProtein = row['Protein A']
-                    interactorProtein = row['Protein B']
-                    targetGene = row['Gene A']
-                    interactorGene = row['Gene B']
-                else:
-                    targetProtein = row['Protein B']
-                    interactorProtein = row['Protein A']
-                    targetGene = row['Gene B']
-                    interactorGene = row['Gene A']
-
-                # filter protein interaction with self
-                if filterSameProteinInteraction and row['Protein A'] == row['Protein B']:
-                    print('skipped protein interaction with self \n \t target {} interactor'.format(targetProtein,
-                                                                                                    interactorProtein))
-                    continue
-
-                score = row['Score']
-
-                # setup first 5 of outRow
-                outRow.extend([targetProtein, targetGene, interactorProtein, interactorGene, score])
-
-                # sending pypdb requests
-                # targetQueryResult = pypdb.Query(targetProtein).search(num_attempts=10,sleep_time=0.9)
-                interactorQueryResult = pypdb.Query(interactorProtein).search(num_attempts=10, sleep_time=0.9)
-
-                # check if something went wrong in pypdb -> set na and go next
-                if interactorQueryResult is None or targetQueryResult is None:
-                    # set output row to na (13 cause we had 5 set and 13 missing positions)
-                    outRow.extend(['na'] * 13)
-                    print('\t PYPDB nonetype returned {}                 '.format(interactorProtein), end='\r')
-                    # append row to dataframe Out
-                    # rowSerie = pd.Series(outRow, index = dataframeOut.columns)
-                    # dataframeOut = dataframeOut.append(rowSerie, ignore_index=True)
-                    dataframeOut.loc[len(dataframeOut)] = outRow
-                else:
-                    # get common pdbs to both proteins
-                    commonPdbs = set(targetQueryResult).intersection(set(interactorQueryResult))
-
-                    # if intersection is not empty
-                    if commonPdbs != set():
-                        print('\t protein interactor {} share pdbs -> {}'.format(interactorProtein, commonPdbs))
-                        # intersection not empty -> run requests to get other columns
-                        # do requests
-                        # !! can be multiple pdbs !!
-                        for pdb in commonPdbs:
-                            fused = ''
-                            dna = ''
-                            ligands = ''
-                            method = ''
-                            targetChainIds = ''
-                            targetStart = ''
-                            targetEnd = ''
-                            interactorChainIds = ''
-                            interactorStart = ''
-                            interactorEnd = ''
-                            otherInteractors = ''
-                            resolution = ''
-
-                            # do requests on pdb chosen
-                            # request summary -> from summary we get fusion, method,dna chains, num ligands
-                            fused, dna, ligands, method = get_summary(pdb)
-                            # request mappings -> from mappings we get chain infos (id, start, stop) and other interactors
-                            targetChainIds, targetStart, targetEnd, interactorChainIds, interactorStart, interactorEnd, otherInteractors = get_mappings_data(
-                                pdb, targetProtein, interactorProtein)
-                            # request experiment -> from experiment we get resolution
-                            resolution = get_experiment(pdb)
-
-                            # add data to output row
-                            outRow.extend([pdb, fused, targetChainIds, targetStart, targetEnd, interactorChainIds,
-                                           interactorStart, interactorEnd, otherInteractors, method, resolution, dna,
-                                           ligands])
-
-                            # add out row to dataframe
-                            # rowSerie = pd.Series(outRow, index = dataframeOut.columns)
-                            # dataframeOut = dataframeOut.append(rowSerie, ignore_index=True)
-                            dataframeOut.loc[len(dataframeOut)] = outRow
-
-                            # reset outrow to first five values -> first five are fixed until we don't change target - interactor pair
-                            # other values change basing on the pdb selected
-                            outRow = outRow[:5]
-                    else:
-                        print('\t interactor {} ->  NO COMMON PDBS'.format(interactorProtein), end='\r')
-                        # intersection empty -> set na and go on
-                        # empty  pdb list, no requests set na
-                        outRow.extend(['na'] * 13)
-                        # rowSerie = pd.Series(outRow, index = dataframeOut.columns)
-                        # dataframeOut = dataframeOut.append(rowSerie, ignore_index=True)
-                        dataframeOut.loc[len(dataframeOut)] = outRow
-                        # print(dataframeOut)
-
-            # args.x -> 1 csv per target
-            if args.x:
-                if args.p:
-                    dataframeOutx = pmid_adder(data, dataframeOut)
-                    # replace chars that will break to_csv
-                    dataframeOutx.replace({',': '_'}, regex=True, inplace=True)
-
-                    dataframeOutx.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
-
-                    dataframeOutx.to_csv('dataframe_' + uniprot + '.csv', index=False, quoting=csv.QUOTE_NONE)
-                    print('>> Out for uniprot {} -> {}'.format(uniprot, 'dataframe_' + uniprot + '.csv'))
-                else:
-                    # replace chars that will break to_csv
-                    dataframeOut.replace({',': '_'}, regex=True, inplace=True)
-
-                    dataframeOut.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
-
-                    dataframeOut.to_csv('dataframe_' + uniprot + '.csv', index=False, quoting=csv.QUOTE_NONE)
-                    print('>> Out for uniprot {} -> {}'.format(uniprot, 'dataframe_' + uniprot + '.csv'))
-
-                # if option -a is selected we have to create folder and subfolders for input.fasta files
-                if args.a:
-                    make_target_interactor_sequence_files(dataframeOut)
+        #CHOSE RIGHT RESULT : Homo sapiens (Human) in organism name and target in id
+        for res in result['results']:
+            if target in res['id'] and res['representativeMember']['organismName'] == 'Homo sapiens (Human)':
+                target_sequence = res['representativeMember']['sequence']['value']
+                break
             else:
+                print(f"result discarded cause {target} not in {res['id']} \n\t "
+                      f"or \n\t {res['representativeMember']['organismName']} is not Homo sapiens (Human)")
+
+        # fix for uniprot genes of type U2AF1L5 {ECO:0000312|HGNC:HGNC:51830} -> error creating folder
+        # covering no space case U2AF1L5{ECO:0000312|HGNC:HGNC:51830} and space case U2AF1L5 {ECO:0000312|HGNC:HGNC:51830}
+        if ' ' in target_uniprot_gene:
+            target_uniprot_gene = target_uniprot_gene.split(' ')[0].rstrip()
+        if '{' in target_uniprot_gene:
+            target_uniprot_gene = target_uniprot_gene.split('{')[0].rstrip()
+
+        # make dir for target
+        Path("inputs_afmulti/" + target_uniprot_gene).mkdir(parents=True, exist_ok=True)
+
+        for interactor_id, interactor_gene in zip(interactor_uniprot_ids, interactor_genes):
+            # for every interactor make request make dir and then build file
+            result = make_request(url, 'get', interactor_id)
+            interactor_sequence = ''
+            if result['results'] != []:
+                ##########CHOSE RIGHT RESULT : Homo sapiens (Human) in organism name and target in id
+                interactor_sequence = ''
+                for res in result['results']:
+                    if interactor_id in res['id'] and res['representativeMember']['organismName'] == 'Homo sapiens (Human)':
+                        interactor_sequence = res['representativeMember']['sequence']['value']
+                        break
+                    else:
+                        print(f"result discarded cause "
+                              f"{interactor_id} not in {res['id']} \n\t "
+                              f"or \n\t "
+                              f"{res['representativeMember']['organismName']} is not Homo sapiens (Human)")
+            else:
+                print('***INTERACTOR {} of target {} returned NO results, skipping folder/sequence creation'.format(
+                    interactor_id, target))
                 continue
 
-    if not args.x:
-        if args.p:
-            dataframeOut = pmid_adder(data, dataframeOut)
-        #replace chars that will break to_csv
-        dataframeOut.replace({',': '_'}, regex=True, inplace=True)
+            if ' ' in interactor_gene:
+                interactor_gene = interactor_gene.split(' ')[0].rstrip()
+            if '{' in interactor_gene:
+                interactor_gene = interactor_gene.split('{')[0].rstrip()
 
-        dataframeOut.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+            # make dir for interactor
+            Path("inputs_afmulti/" + target_uniprot_gene + '/' + interactor_gene).mkdir(parents=True, exist_ok=True)
 
-        dataframeOut.to_csv(args.o, index=False, quoting=csv.QUOTE_NONE)
-        print('>> Out total (no splitted output option -x) selected -> {}'.format(args.o))
+            print('>>Made folder {}                     '.format(
+                "inputs_afmulti/" + target_uniprot_gene + '/' + interactor_gene), end='\r')
 
-        if args.a:
-            make_target_interactor_sequence_files(dataframeOut)
-
-    print('\nFinished')
-
-
-def make_target_interactor_sequence_files(dataframeOut):
-    with open('log.txt', 'w+') as log_file:
-        # get target list so we cover -x option (splitted outs) and normal (with all the targets in the same dataframe
-        target_list = list(dict.fromkeys(dataframeOut['target uniprot id'].tolist()))
-
-        from pathlib import Path
-        Path("inputs_afmulti").mkdir(parents=True, exist_ok=True)
-
-        url = 'https://rest.uniprot.org/uniref/search?query=uniprot_id:'
-
-        for target in target_list:
-            print('>>Making folders/files for target {}                   '.format(target))
-
-            # filter dataframe
-            target_data = dataframeOut[(dataframeOut['target uniprot id'] == target)]
-            interactor_uniprot_ids = target_data['interactor uniprot id'].to_list()
-            interactor_genes = target_data['interactor uniprot gene'].to_list()
-
-            # get first gene value -> same target = all the same
-            target_uniprot_gene = target_data['target uniprot gene'].values[0]
-
-            # get target sequence
-            result = make_request(url, 'get', target)
-
-            target_sequence = ''
-
-            ##################################CHOSE RIGHT RESULT : Homo sapiens (Human) in organism name and target in id
-            for res in result['results']:
-                if target in res['id'] and res['representativeMember']['organismName'] == 'Homo sapiens (Human)':
-                    target_sequence = res['representativeMember']['sequence']['value']
-                    break
-                else:
-                    print(f"result discarded cause {target} not in {res['id']} \n\t or \n\t {res['representativeMember']['organismName']} is not Homo sapiens (Human)")
-
-
-
-            # fix for uniprot genes of type U2AF1L5 {ECO:0000312|HGNC:HGNC:51830} -> error creating folder
-            # covering no space case U2AF1L5{ECO:0000312|HGNC:HGNC:51830} and space case U2AF1L5 {ECO:0000312|HGNC:HGNC:51830}
-            if ' ' in target_uniprot_gene:
-                target_uniprot_gene = target_uniprot_gene.split(' ')[0].rstrip()
-            if '{' in target_uniprot_gene:
-                target_uniprot_gene = target_uniprot_gene.split('{')[0].rstrip()
-
-            # make dir for target
-            Path("inputs_afmulti/" + target_uniprot_gene).mkdir(parents=True, exist_ok=True)
-
-            for interactor_id, interactor_gene in zip(interactor_uniprot_ids, interactor_genes):
-                # for every interactor make request make dir and then build file
-                result = make_request(url, 'get', interactor_id)
-                interactor_sequence = ''
-                if result['results'] != []:
-                    ##################################CHOSE RIGHT RESULT : Homo sapiens (Human) in organism name and target in id
-                    interactor_sequence = ''
-                    for res in result['results']:
-                        if interactor_id in res['id'] and res['representativeMember']['organismName'] == 'Homo sapiens (Human)':
-                            interactor_sequence = res['representativeMember']['sequence']['value']
-                            break
-                        else:
-                            print(f"result discarded cause "
-                                  f"{interactor_id} not in {res['id']} \n\t "
-                                  f"or \n\t "
-                                  f"{res['representativeMember']['organismName']} is not Homo sapiens (Human)")
-                else:
-                    print('***INTERACTOR {} of target {} returned NO results, skipping folder/sequence creation'.format(
-                        interactor_id, target))
-                    log_file.write(
-                        '***INTERACTOR {} of target {} returned NO results, skipping folder/sequence creation \n'.format(
-                            interactor_id, target))
-                    continue
-
-                if ' ' in interactor_gene:
-                    interactor_gene = interactor_gene.split(' ')[0].rstrip()
-                if '{' in interactor_gene:
-                    interactor_gene = interactor_gene.split('{')[0].rstrip()
-
-                # make dir for interactor
-                Path("inputs_afmulti/" + target_uniprot_gene + '/' + interactor_gene).mkdir(parents=True, exist_ok=True)
-
-                print('>>Made folder {}                     '.format(
-                    "inputs_afmulti/" + target_uniprot_gene + '/' + interactor_gene), end='\r')
-
-                with open("inputs_afmulti/" + target_uniprot_gene + '/' + interactor_gene + '/input.fasta',
-                          'w+') as alpha_file:
-                    alpha_file.write('>' + target_uniprot_gene + '\n')
-                    alpha_file.write(target_sequence + '\n')
-                    alpha_file.write('>' + interactor_gene + '\n')
-                    alpha_file.write(interactor_sequence + '\n')
+            with open("inputs_afmulti/" + target_uniprot_gene + '/' + interactor_gene + '/input.fasta',
+                      'w+') as alpha_file:
+                alpha_file.write('>' + target_uniprot_gene + '\n')
+                alpha_file.write(target_sequence + '\n')
+                alpha_file.write('>' + interactor_gene + '\n')
+                alpha_file.write(interactor_sequence + '\n')
 
     return 0
 
@@ -342,7 +141,7 @@ def get_experiment(pdb):
     """
     This function retrieves PDB > experiment
 
-    :param pdb_id: String,
+    :param pdb: String,
     :return: resolution: String
     """
 
@@ -369,7 +168,7 @@ def get_summary(pdb):
     """
     This function retrieves PDB > summary
 
-    :param pdb_id: String,
+    :param pdb: String,
     :return: fused: String ('yes'/'')
              dna: String
              ligands: String
@@ -417,7 +216,7 @@ def get_mappings_data(pdb, targetProtein, interactorProtein):
     This function will GET the mappings data from
     the PDBe API using the make_request() function
 
-    :param pdb_id: String
+    :param pdb: String
     :return: targetChainIds: String
              targetStart: String
              targetEnd: String
@@ -475,17 +274,15 @@ def get_mappings_data(pdb, targetProtein, interactorProtein):
                         interactorEnd.append(mapping['unp_end'])
 
     # convert lists to strings
-    targetChainIds = ';'.join([str(x) for x in targetChainIds])
-    targetStart = ';'.join([str(x) for x in targetStart])
-    targetEnd = ';'.join([str(x) for x in targetEnd])
+    targetChainIds = 'na' if targetChainIds == [] else ';'.join([str(x) for x in targetChainIds])
+    targetStart = 'na' if targetStart == [] else ';'.join([str(x) for x in targetStart])
+    targetEnd = 'na' if targetEnd == [] else ';'.join([str(x) for x in targetEnd])
 
-    interactorChainIds = ';'.join([str(x) for x in interactorChainIds])
-    interactorStart = ';'.join([str(x) for x in interactorStart])
-    interactorEnd = ';'.join([str(x) for x in interactorEnd])
+    interactorChainIds = 'na' if interactorChainIds == [] else ';'.join([str(x) for x in interactorChainIds])
+    interactorStart = 'na' if interactorStart == [] else ';'.join([str(x) for x in interactorStart])
+    interactorEnd = 'na' if interactorEnd == [] else ';'.join([str(x) for x in interactorEnd])
 
-    otherInteractors = ';'.join([str(x) for x in otherInteractors])
-    if otherInteractors == '':
-        otherInteractors = 'na'
+    otherInteractors = 'na' if otherInteractors == [] else ';'.join([str(x) for x in otherInteractors])
 
     return targetChainIds, targetStart, targetEnd, interactorChainIds, interactorStart, interactorEnd, otherInteractors
 
@@ -501,8 +298,10 @@ def make_request(url, mode, pdb_id):
     :return: JSON or None
     """
     if mode == "get":
+        time.sleep(0.01)
         response = requests.get(url=url + pdb_id)
     elif mode == "post":
+        time.sleep(0.01)
         response = requests.post(url, data=pdb_id)
 
     if response.status_code == 200:
@@ -512,6 +311,461 @@ def make_request(url, mode, pdb_id):
 
     return None
 
+def normal_run(args):
+    datasets = []
+    filterSameProteinInteraction = False
+
+    if args.filter:
+        filterSameProteinInteraction = True
+
+    # read data with pandas
+    data = pd.read_csv(args.i, sep=';', converters={'Score': Decimal})
+
+    # filtering for taxon.A = 9606 AND taxon.B = 9606 AND score >= cutoff (args.s)
+    data = data[(data['Taxon A'] == 9606) & (data['Taxon B'] == 9606) & (data['Score'] >= args.s)]
+
+    dataframeOut = pd.DataFrame(columns=['target uniprot id', 'target uniprot gene',  # 2 -> from csv
+                                         'interactor uniprot id', 'interactor uniprot gene',  # 2 -> from csv
+                                         'mentha score',  # 1 -> from csv
+                                         'PDB id',  # 1 -> from pypdb lib
+                                         'fusion',  # 1 -> from summary request
+                                         'target chain id', 'target starting residue', 'target ending residue',
+                                         # 3 -> from mappings request
+                                         'interactor chain id', 'interactor starting residue',
+                                         'interactor ending residue',  # 3 -> from mappings request
+                                         'other interactors',  # 1 -> from mappings request
+                                         'method',  # 1 -> from summary request
+                                         'resolution',  # 1 -> from experiment request
+                                         'dna chains', 'num ligands'])  # 2 -> from summary request
+    # -----------------------------
+    # 18 columns total
+
+    # open uniprot target file and get lines
+    targets = []
+    with open(args.t, 'r') as uniprotTargets:
+        for uniprot in uniprotTargets:
+            targets.append(uniprot)
+            if args.x:
+                dataframeOut = dataframeOut[0:0]
+            uniprot = uniprot.rstrip()
+
+            # get data where protein A or protein b matches uniprot selected
+            uniprotData = data[(data['Protein A'] == uniprot) | (data['Protein B'] == uniprot)]
+
+            uniprotData = uniprotData.reset_index()  # make sure indexes pair with number of rows
+
+            targetQueryResult = pypdb.Query(uniprot).search(num_attempts=10, sleep_time=5)
+            print('Target {}                                          '.format(uniprot))
+            for index, row in uniprotData.iterrows():
+                targetProtein = ''
+                interactorProtein = ''
+                targetGene = ''
+                interactorGene = ''
+                score = Decimal('0')
+                # list that will later added to dataframe out
+                outRow = []
+
+                if row['Protein A'] == uniprot:
+                    targetProtein = row['Protein A']
+                    interactorProtein = row['Protein B']
+                    targetGene = row['Gene A']
+                    interactorGene = row['Gene B']
+                else:
+                    targetProtein = row['Protein B']
+                    interactorProtein = row['Protein A']
+                    targetGene = row['Gene B']
+                    interactorGene = row['Gene A']
+
+                # filter protein interaction with self
+                if filterSameProteinInteraction and row['Protein A'] == row['Protein B']:
+                    print('skipped protein interaction with self \n \t target {} interactor'.format(targetProtein,
+                                                                                                    interactorProtein))
+                    continue
+
+                score = row['Score']
+
+                # setup first 5 of outRow
+                outRow.extend([targetProtein, targetGene, interactorProtein, interactorGene, score])
+
+                # sending pypdb requests
+                interactorQueryResult = pypdb.Query(interactorProtein).search(num_attempts=10, sleep_time=5)
+
+                # check if something went wrong in pypdb -> set na and go next
+                if interactorQueryResult is None or targetQueryResult is None:
+                    # set output row to na (13 cause we had 5 set and 13 missing positions)
+                    outRow.extend(['na'] * 13)
+                    print('\t PYPDB nonetype returned {}                 '.format(interactorProtein), end='\r')
+                    # append row to dataframe Out
+                    dataframeOut.loc[len(dataframeOut)] = outRow
+                else:
+                    # get common pdbs to both proteins
+                    commonPdbs = set(targetQueryResult).intersection(set(interactorQueryResult))
+
+                    # if intersection is not empty
+                    if commonPdbs != set():
+                        print('\t protein interactor {} share pdbs -> {}'.format(interactorProtein, commonPdbs))
+                        # intersection not empty -> run requests to get other columns
+                        # do requests
+                        # !! can be multiple pdbs !!
+                        for pdb in commonPdbs:
+                            fused = ''
+                            dna = ''
+                            ligands = ''
+                            method = ''
+                            targetChainIds = ''
+                            targetStart = ''
+                            targetEnd = ''
+                            interactorChainIds = ''
+                            interactorStart = ''
+                            interactorEnd = ''
+                            otherInteractors = ''
+                            resolution = ''
+
+                            # do requests on pdb chosen
+                            # request summary -> from summary we get fusion, method,dna chains, num ligands
+                            fused, dna, ligands, method = get_summary(pdb)
+                            # request mappings -> from mappings we get chain infos (id, start, stop) and other interactors
+                            targetChainIds, targetStart, targetEnd, interactorChainIds, interactorStart, interactorEnd, otherInteractors = get_mappings_data(
+                                pdb, targetProtein, interactorProtein)
+                            # request experiment -> from experiment we get resolution
+                            resolution = get_experiment(pdb)
+
+                            # add data to output row
+                            outRow.extend([pdb, fused, targetChainIds, targetStart, targetEnd, interactorChainIds,
+                                           interactorStart, interactorEnd, otherInteractors, method, resolution, dna,
+                                           ligands])
+
+                            # add out row to dataframe
+                            # rowSerie = pd.Series(outRow, index = dataframeOut.columns)
+                            # dataframeOut = dataframeOut.append(rowSerie, ignore_index=True)
+                            dataframeOut.loc[len(dataframeOut)] = outRow
+
+                            # reset outrow to first five values -> first five are fixed until we don't change target - interactor pair
+                            # other values change basing on the pdb selected
+                            outRow = outRow[:5]
+                    else:
+                        print('\t interactor {} ->  NO COMMON PDBS'.format(interactorProtein), end='\r')
+                        # intersection empty -> set na and go on
+                        # empty  pdb list, no requests set na
+                        outRow.extend(['na'] * 13)
+                        dataframeOut.loc[len(dataframeOut)] = outRow
+
+
+            # args.x -> 1 csv per target
+            if args.x:
+                if args.p:
+                    dataframeOutx = pmid_adder(data, dataframeOut)
+                    # replace chars that will break to_csv
+                    dataframeOutx.replace({',': '_'}, regex=True, inplace=True)
+
+                    dataframeOutx.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+
+                    dataframeOutx['normal_or_cfg'] = 0
+
+                    datasets.append(dataframeOutx)
+                    print('>> Out for uniprot {} -> {}'.format(uniprot, 'dataframe_' + uniprot + '.csv'))
+                else:
+                    # replace chars that will break to_csv
+                    dataframeOut.replace({',': '_'}, regex=True, inplace=True)
+
+                    dataframeOut.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+
+                    dataframeOutx['normal_or_cfg'] = 0
+
+                    datasets.append(dataframeOutx)
+
+                # if option -a is selected we have to create folder and subfolders for input.fasta files
+                if args.a:
+                    make_target_interactor_sequence_files(dataframeOut)
+            else:
+                continue
+
+
+    if not args.x:
+        if args.p:
+            dataframeOut = pmid_adder(data, dataframeOut)
+        # replace chars that will break to_csv
+        dataframeOut.replace({',': '_'}, regex=True, inplace=True)
+
+        dataframeOut.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+
+        dataframeOut['normal_or_cfg'] = 0
+
+        datasets.append(dataframeOut)
+
+        if args.a:
+            make_target_interactor_sequence_files(dataframeOut)
+
+    return datasets, targets
+
+def cfg_run(args):
+    print('CFG')
+    datasets = []
+
+    config_file = args.c
+
+    # if have config, read config
+    if config_file != '':
+        config_dict = {}
+        import configparser
+
+        config = configparser.ConfigParser()
+        with open(config_file, 'r') as cfg_file:
+            config.read_file(cfg_file)
+
+        for each_section in config.sections():
+            l = []
+            for (each_key, each_val) in config.items(each_section):
+                l.append(each_val.strip().split(','))
+            config_dict[each_section] = l
+    else:
+        return None
+
+    filterSameProteinInteraction = False
+
+    if args.filter:
+        filterSameProteinInteraction = True
+
+    # read data with pandas
+    data = pd.read_csv(args.i, sep=';', converters={'Score': Decimal})
+
+    # filtering for taxon.A = 9606 AND taxon.B = 9606 AND score >= cutoff (args.s)
+    data = data[(data['Taxon A'] == 9606) & (data['Taxon B'] == 9606) & (data['Score'] >= args.s)]
+
+    dataframeOut = pd.DataFrame(columns=['target uniprot id', 'target uniprot gene',  # 2 -> from csv
+                                         'interactor uniprot id', 'interactor uniprot gene',  # 2 -> from csv
+                                         'mentha score',  # 1 -> from csv
+                                         'PDB id',  # 1 -> from pypdb lib
+                                         'fusion',  # 1 -> from summary request
+                                         'target chain id', 'target starting residue', 'target ending residue',
+                                         # 3 -> from mappings request
+                                         'interactor chain id', 'interactor starting residue',
+                                         'interactor ending residue',  # 3 -> from mappings request
+                                         'other interactors',  # 1 -> from mappings request
+                                         'method',  # 1 -> from summary request
+                                         'resolution',  # 1 -> from experiment request
+                                         'dna chains', 'num ligands'])  # 2 -> from summary request
+    # -----------------------------
+    # 18 columns total
+
+    # open uniprot target file and get lines
+    with open(args.t, 'r') as uniprotTargets:
+        pmids = []
+        for uniprot in uniprotTargets:
+
+
+            if args.x:
+                dataframeOut = dataframeOut[0:0]
+                pmids = []
+
+            uniprot = uniprot.rstrip()
+
+            # get data where protein A or protein b matches uniprot selected
+            uniprotData = data[(data['Protein A'] == uniprot) | (data['Protein B'] == uniprot)]
+
+            uniprotData = uniprotData.reset_index()  # make sure indexes pair with number of rows
+
+            # cfg_data = config_dict[uniprot]
+            cfg_data = config_dict.get(uniprot, [])
+            if cfg_data == []:
+                print(f'no config for target {uniprot} ')
+
+            for cfg in cfg_data:
+                int_id = cfg[0]
+                int_gene = cfg[1]
+                int_pdb = cfg[2]
+                int_pmid = cfg[3]
+
+                pmids.append(int_pmid)
+
+                targetProtein = ''
+                interactorProtein = ''
+                targetGene = ''
+                interactorGene = ''
+                score = 'na'
+
+                outRow = []
+
+                for index, row in uniprotData.iterrows():
+                    if row['Protein A'] == uniprot:
+                        targetProtein = row['Protein A']
+                        interactorProtein = int_id
+                        targetGene = row['Gene A']
+                        interactorGene = int_gene
+                        break
+                    else:
+                        targetProtein = row['Protein B']
+                        interactorProtein = int_id
+                        targetGene = row['Gene B']
+                        interactorGene = int_gene
+                        break
+
+                #try to get score from db for config lines
+                for index, row in uniprotData.iterrows():
+                    if row['Protein A'] == uniprot and row['Protein B'] == int_id:
+                        score = row['Score']
+                    elif row['Protein A'] == int_id and row['Protein B'] == uniprot:
+                        score = row['Score']
+
+                # setup first 5 of outRow
+                outRow.extend([targetProtein, targetGene, interactorProtein, interactorGene, score])
+
+                if int_pdb == '':
+                    print(f'>>PDB is not present \n\t {cfg} \n row is na')
+                    #setting score to na -> we have no score coming from mentha db -> target interactor not in db
+                    outRow[4] = 'na'
+                    #setting all columns to na -> no pdb to use for requests
+                    ext = ['na' for x in range(13)]
+                    outRow.extend(ext)
+                    #save row
+                    dataframeOut.loc[len(dataframeOut)] = outRow
+                    #reset row for next config row
+                    outRow = outRow[:5]
+                    continue
+
+                #we reach this part only if we have a pdb to use
+                fused = ''
+                dna = ''
+                ligands = ''
+                method = ''
+                targetChainIds = ''
+                targetStart = ''
+                targetEnd = ''
+                interactorChainIds = ''
+                interactorStart = ''
+                interactorEnd = ''
+                otherInteractors = ''
+                resolution = ''
+
+                # do requests on pdb chosen
+                # request summary -> from summary we get fusion, method,dna chains, num ligands
+                fused, dna, ligands, method = get_summary(int_pdb)
+                # request mappings -> from mappings we get chain infos (id, start, stop) and other interactors
+                targetChainIds, targetStart, targetEnd, interactorChainIds, interactorStart, interactorEnd, otherInteractors = get_mappings_data(
+                    int_pdb, targetProtein, interactorProtein)
+                # request experiment -> from experiment we get resolution
+                resolution = get_experiment(int_pdb)
+
+                # add data to output row
+                outRow.extend([int_pdb, fused, targetChainIds, targetStart, targetEnd, interactorChainIds,
+                               interactorStart, interactorEnd, otherInteractors, method, resolution, dna,
+                               ligands])
+
+                # add out row to dataframe
+                dataframeOut.loc[len(dataframeOut)] = outRow
+                outRow = outRow[:5]
+
+            if args.x:
+                if args.p:
+                    #add pmid col
+                    df_out = dataframeOut.copy(deep=True)
+                    df_out['PMID'] = pmids
+                    df_out.replace({',': '_'}, regex=True, inplace=True)
+                    df_out.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+                    df_out['normal_or_cfg'] = 1
+                    datasets.append(df_out)
+                else:
+                    df_out = dataframeOut.copy(deep=True)
+                    df_out.replace({',': '_'}, regex=True, inplace=True)
+                    df_out.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+                    df_out['normal_or_cfg'] = 1
+                    datasets.append(df_out)
+                if args.a:
+                    make_target_interactor_sequence_files(df_out)
+
+    if not args.x:
+        if args.p:
+
+            dataframeOut['PMID'] = pmids
+        dataframeOut.replace({',': '_'}, regex=True, inplace=True)
+        dataframeOut.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+        dataframeOut['normal_or_cfg'] = 1
+        datasets.append(dataframeOut)
+        if args.a:
+            make_target_interactor_sequence_files(dataframeOut)
+
+    return datasets
+
+
+def main(argv):
+    warnings.filterwarnings("ignore")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--i', help='mentha database file')
+    parser.add_argument('-t', '--t', help='File with target uniprots')
+    parser.add_argument('-s', '--s', type=Decimal, help='Cutoff score')
+    parser.add_argument('-o', '--o', nargs='?', const='dataframe.csv', default='dataframe.csv', help='Output name')
+    parser.add_argument('-f', '--filter', action='store_true')
+    parser.add_argument('-p', '--p', action='store_true', help='option to add PMID column to output')
+    parser.add_argument('-x', '--x', action='store_true', help='option to have 1 csv output file per target uniprot ID')
+    parser.add_argument('-a', '--a', action='store_true', help='option to have inputs_afmulti folder with subfolders and input.fasta files')
+    parser.add_argument('-c', '--c', default='', help='Config file containing rows to insert into mentha db')
+
+    args = parser.parse_args()
+
+    datasets = []
+    config_datasets = []
+    targets = []
+    datasets, targets = normal_run(args)
+    config_datasets = cfg_run(args)
+
+    if config_datasets == None:
+        config_datasets = []
+        for d in datasets:
+            config_datasets.append(pd.DataFrame(columns=d.columns))
+
+    for ds, ds_cfg, target in zip(datasets, config_datasets, targets):
+
+        result = pd.merge(ds, ds_cfg, how='outer',
+                          left_on=['target uniprot id', 'target uniprot gene', 'interactor uniprot id', 'interactor uniprot gene', 'PDB id'],
+                          right_on=['target uniprot id', 'target uniprot gene', 'interactor uniprot id', 'interactor uniprot gene', 'PDB id'])
+
+        result.replace('na', np.nan, inplace=True)
+
+        l = []
+        dfxF = pd.DataFrame(columns=ds.columns)
+        for i, row in result.iterrows():
+            if row['normal_or_cfg_x'] == 0.0 and pd.isna(row['normal_or_cfg_y']):
+                # row in normal run but not in config
+                lfix = row.iloc[0:20].tolist()
+                l.append(lfix)
+                dfxF.loc[len(dfxF)] = lfix
+            elif row['normal_or_cfg_x'] == 0.0 and row['normal_or_cfg_y'] == 1.0:
+                # row in normal and in config
+                row['pmid'] = str(row['PMID_x']) + ' ' + str(row['PMID_y'])
+                lfix = row.iloc[0:18].tolist() + [row['pmid'], 2]
+                l.append(lfix)
+                dfxF.loc[len(dfxF)] = lfix
+            elif pd.isna(row['normal_or_cfg_x']) and row['normal_or_cfg_y'] == 1.0:
+                # row in cfg but not in normal
+                lfix = row.iloc[0:6].tolist() + row.iloc[21:].tolist()
+                l.append(lfix)
+                dfxF.loc[len(dfxF)] = lfix
+
+        dfxF.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+
+        dfxF.replace(np.nan, 'na', inplace=True)
+
+        dfxF.drop(['normal_or_cfg'], axis=1, inplace=True)
+
+        csv_outname = args.o
+        if len(datasets) == 1:
+            #csv_outname = 'total_analysis_dataset.csv'
+            pass
+        else:
+            splitted_o = args.o.split('.')
+            #example
+            #args.o = out.csv
+            #csv_outname = out_<target>.csv
+            csv_outname = f'{splitted_o[0]}_{target.strip()}.csv'
+            #csv_outname = f'dataframe_{target.strip()}.csv'
+
+        if not args.x:
+            print(f'>>writing full dataframe (no splitted option selected -x) -> {csv_outname}')
+            dfxF.to_csv(csv_outname, index=False, quoting=csv.QUOTE_NONE, sep=',')
+        else:
+            print(f'>>writing dataframe for target {target} -> {csv_outname}')
+            dfxF.to_csv(csv_outname, index=False, quoting=csv.QUOTE_NONE, sep=',')
 
 if __name__ == "__main__":
     main(sys.argv[1:])
+
