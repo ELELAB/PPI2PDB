@@ -31,11 +31,11 @@ interactor2 = O75143,ATG13,,34369648
 Where [Q9GZQ8] and [Q7Z3C6] are the uniprot IDs of the target proteins. The interactors to annotate should be listed one after the other, one per row. For each interactor is mandatory to specify its Uniprot ID, gene name and PMID associated with the publication in wich the interaction is experimentally validated. Optional a PDB could be specified and it will be annotated 
 
 #Example
-run the script in example as <br />
-python ../mentha2pdb.py -i /data/databases/mentha-20220530/2022-05-30 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -a <br />
+run the bash script run.sh in example folder as bash run.sh it will perform <br />
+python ../mentha2pdb.py -i /data/databases/mentha-20230417/2023-04-17 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -a <br />
 
-run the script in example2 as <br />
-python ../mentha2pdb.py -i /data/databases/mentha-20220530/2022-05-30 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -a -c config.ini <br />
+run the bash script run.sh in example2 folder as bash run.sh it will perform <br />
+python ../mentha2pdb.py -i /data/databases/mentha-20230417/2023-04-17 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -a -c config.ini <br />
 
-run the script in example3 as <br />
-python ../mentha2pdb.py -i /data/databases/mentha-20220530/2022-05-30 -t target_uniprot_ID.txt -s 0.2 -o Q9GZQ8.csv -p -a -c config.ini <br />
+run the bash script run.sh in example3 folder as bash run.sh it will perform <br />
+python ../mentha2pdb.py -i /data/databases/mentha-20230417/2023-04-17 -t target_uniprot_ID.txt -s 0.2 -o Q9GZQ8.csv -p -a -c config.ini <br />
