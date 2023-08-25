@@ -1,9 +1,0 @@
-target uniprot id,target uniprot gene,interactor uniprot id,interactor uniprot gene,mentha score,PDB id,fusion,target chain id,target starting residue,target ending residue,interactor chain id,interactor starting residue,interactor ending residue,other interactors,method,resolution,dna chains,num ligands,PMID
-Q9GZQ8,MAP1LC3B,Q9H8Y8,GORASP2,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na
-Q9GZQ8,MAP1LC3B,Q8IVP5,FUNDC1,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na
-Q9GZQ8,MAP1LC3B,Q15025,TNIP1,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na
-Q9GZQ8,MAP1LC3B,Q14696,MESDC2,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na
-Q9GZQ8,MAP1LC3B,Q13501,SQSTM1,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na
-Q9GZQ8,MAP1LC3B,Q9BQD3,KXD1,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na
-Q9GZQ8,MAP1LC3B,Q8WZA9,IRGQ,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na
-Q9GZQ8,MAP1LC3B,Q9Y4P1,ATG4B,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na
