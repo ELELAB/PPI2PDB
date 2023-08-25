@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu May 12 09:14:52 2022
-updated June 2023 v 1.2
+updated August 2023 v 1.3
 
-@author: Matteo
+@author: Matteo Lambrughi
 """
+
+import logging
+import os
+
+import requests
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 import sys
@@ -52,8 +59,9 @@ def make_target_interactor_sequence_files(dataframe_out):
                 target_sequence = res['representativeMember']['sequence']['value']
                 break
             else:
-                print(f"result discarded cause {target} not in {res['id']} \n\t "
-                      f"or \n\t {res['representativeMember']['organismName']} is not Homo sapiens (Human)")
+                # print(f"result discarded cause {target} not in {res['id']} \n\t "
+                #       f"or \n\t {res['representativeMember']['organismName']} is not Homo sapiens (Human)")
+                pass
 
         # fix for uniprot genes of type U2AF1L5 {ECO:0000312|HGNC:HGNC:51830} -> error creating folder
         # covering no space case U2AF1L5{ECO:0000312|HGNC:HGNC:51830} and space case U2AF1L5 {ECO:0000312|HGNC:HGNC:51830}
@@ -77,10 +85,11 @@ def make_target_interactor_sequence_files(dataframe_out):
                         interactor_sequence = res['representativeMember']['sequence']['value']
                         break
                     else:
-                        print(f"result discarded cause "
-                              f"{interactor_id} not in {res['id']} \n\t "
-                              f"or \n\t "
-                              f"{res['representativeMember']['organismName']} is not Homo sapiens (Human)")
+                        # print(f"result discarded cause "
+                        #       f"{interactor_id} not in {res['id']} \n\t "
+                        #       f"or \n\t "
+                        #       f"{res['representativeMember']['organismName']} is not Homo sapiens (Human)")
+                        pass
             else:
                 print('***INTERACTOR {} of target {} returned NO results, skipping folder/sequence creation'.format(
                     interactor_id, target))
@@ -686,6 +695,210 @@ def cfg_run(args):
 
     return datasets
 
+def convert_ensg(ensg_list):
+
+    print(f'Please wait ... ({len(ensg_list)} ensg codes are being converted)')
+    url = 'https://rest.uniprot.org/uniprotkb/search?query='
+    urls = []
+
+    urls = [url+ensg for ensg in ensg_list]
+
+    ensg_d = {}
+    ensg_d = download(urls, ensg_d)
+
+    return ensg_d
+
+def eextract_gs_sc(data, i1, i2):
+    ddata = data[(data['Protein A'] == i1) & (data['Protein B'] == i2)]
+    idata = data[(data['Protein B'] == i1) & (data['Protein A'] == i2)]
+    score ='na'
+    if not ddata.empty:
+        score = ddata['Score'].iloc[0]
+    elif not idata.empty:
+        score = idata['Score'].iloc[0]
+
+    g1 = 'na'
+    g2 = 'na'
+    uniprotData1A = data[(data['Protein A'] == i1)]
+    uniprotData1B = data[(data['Protein B'] == i1)]
+    uniprotData2A = data[(data['Protein A'] == i2)]
+    uniprotData2B = data[(data['Protein B'] == i2)]
+
+
+    if not uniprotData1A.empty:
+        # go check in b data
+        g1 = uniprotData1A['Gene A'].iloc[0]
+    elif not uniprotData1B.empty:
+        # go check in a data
+        g1 = uniprotData1B['Gene B'].iloc[0]
+
+    if not uniprotData2A.empty:
+        # go check in b data
+        g2 = uniprotData2A['Gene A'].iloc[0]
+    elif not uniprotData2B.empty:
+        # go check in a data
+        g2 = uniprotData2B['Gene B'].iloc[0]
+
+    return g1, g2, score
+
+def extract_gene(data, id):
+    # uniprotdata = data[(data['Protein A'] == id)]
+    # gene = 'na'
+    # if not uniprotdata.empty:
+    #     #go check in a data
+    #     gene = uniprotdata['Gene A'].iloc[0]
+    # else:
+    #     #go check in b data
+    #     uniprotdata = data[(data['Protein B'] == id)]
+    #     if not uniprotdata.empty:
+    #         gene = uniprotdata['Gene B'].iloc[0]
+    gene='EXTRAGENE'
+    return gene
+
+def extract_genes(data, edf_list, target_list):
+    ol = []
+
+    for target, edf in zip(target_list, edf_list):
+        #target gene
+        tg = extract_helper(data, target)
+        edf['target uniprot gene'] = tg
+
+        #interactor gene
+        edf_interactors = edf['interactor uniprot id'].tolist()
+        edf_interactor_gene_list = []
+        for interactor in edf_interactors:
+            ig = extract_helper(data, interactor)
+            edf_interactor_gene_list.append(ig)
+
+        edf['interactor uniprot gene'] = edf_interactor_gene_list
+
+        ol.append(edf)
+
+    return ol
+
+def extract_helper(data, id):
+    gene = ''
+    targetdata = data[(data['Protein A'] == id)]
+    if not targetdata.empty:
+        gene = targetdata['Gene A'].iloc[0]
+    else:
+        targetdata = data[(data['Protein B'] == id)]
+        if not targetdata.empty:
+            gene = targetdata['Gene B'].iloc[0]
+        else:
+            #last chance make request to uniprot.org
+            gene = extract_gene_fromrequest(id)
+
+    return gene
+
+def extract_gene_fromrequest(id):
+
+    url = 'https://rest.uniprot.org/uniprotkb/search?query='
+
+    res = make_request(url,'get',id)
+
+    gene = res['results'][0]['genes'][0]['geneName']['value']
+
+    return gene
+
+def process_extra_files(args, extra_files):
+
+    datasets = []
+    extra_df = pd.DataFrame(columns=['target uniprot id', 'target uniprot gene',  # 2 -> from csv
+                                         'interactor uniprot id', 'interactor uniprot gene',  # 2 -> from csv
+                                         'mentha score',  # 1 -> from csv
+                                         'PDB id',  # 1 -> from pypdb lib
+                                         'fusion',  # 1 -> from summary request
+                                         'target chain id', 'target starting residue', 'target ending residue',
+                                         # 3 -> from mappings request
+                                         'interactor chain id', 'interactor starting residue',
+                                         'interactor ending residue',  # 3 -> from mappings request
+                                         'other interactors',  # 1 -> from mappings request
+                                         'method',  # 1 -> from summary request
+                                         'resolution',  # 1 -> from experiment request
+                                         'dna chains', 'num ligands','PMID'])  # 2 ->
+
+    # read data with pandas
+    data = pd.read_csv(args.i, sep=';', converters={'Score': Decimal})
+    # filtering for taxon.A = 9606 AND taxon.B = 9606 AND score >= cutoff (args.s)
+    data = data[(data['Taxon A'] == 9606) & (data['Taxon B'] == 9606) & (data['Score'] >= args.s)]
+
+    targets = []
+    file = open(args.t, 'r')
+    targets = file.readlines()
+    targets = [t.strip() for t in targets]
+    file.close()
+
+    if args.extra == [] or args.extra == None:
+        print('No extra files given, skipping extra files processing')
+    else:
+        pair_list = []
+        ensg = []
+        for extra_file in extra_files:
+            extra_file_data = pd.read_csv(extra_file, sep=',')
+            name_serie = extra_file_data['Name']
+            for pair in name_serie:
+                id1, id2 = pair.split('-', 1)
+                pair_list.append([id1,id2])
+                if 'ENSG' in id1 and id1 not in ensg:
+                    ensg.append(id1)
+                if 'ENSG' in id2 and id2 not in ensg:
+                    ensg.append(id2)
+
+        ensg_dict = convert_ensg(ensg)
+
+        edf = []
+        for target in targets:
+            for id_pair in pair_list:
+                i1, i2 = id_pair
+                if 'ENSG' in i1:
+                    i1 = ensg_dict[i1]
+                if 'ENSG' in i2:
+                    i2 = ensg_dict[i2]
+
+                sc= 'na'
+                g1 = 'extra gene'
+                g2 = 'extra gene'
+                if i1 == target:
+                    row = [i1, g1, i2, g2, sc] + ['na']*14
+                    extra_df.loc[len(extra_df)] = row
+                elif i2 == target:
+                    row = [i2, g2, i1, g1, sc] + ['na']*14
+                    extra_df.loc[len(extra_df)] = row
+            edf.append(extra_df)
+            extra_df= extra_df[0:0]
+
+        #grab gene from bs for extra files
+        datasets = extract_genes(data, edf, targets)
+
+    return datasets
+
+def grab_result(url):
+    response = session.get(url)
+    #logging.info("request was completed in %s seconds [%s]", response.elapsed.total_seconds(), response.url)
+    if response.status_code != 200:
+        pass
+        #logging.error("request failed, error code %s [%s]", response.status_code, response.url)
+    if 500 <= response.status_code < 600:
+        # server is overloaded? give it a break
+        time.sleep(5)
+    return response
+
+def download(urls, d):
+    with ThreadPoolExecutor(max_workers=THREAD_POOL) as executor:
+        # wrap in a list() to wait for all requests to complete
+        for response, url in zip(list(executor.map(grab_result, urls)), urls):
+            _, ensg_number = url.split('=', 1)
+            if response.status_code == 200:
+                r = response.json()
+                if r['results'] != []:
+                    d[ensg_number] = r['results'][0]['primaryAccession']
+                else:
+                    d[ensg_number] = None
+            else:
+                d[ensg_number] = None
+    return d
+
 
 def main(argv):
     warnings.filterwarnings("ignore")
@@ -699,21 +912,44 @@ def main(argv):
     parser.add_argument('-x', '--x', action='store_true', help='option to have 1 csv output file per target uniprot ID')
     parser.add_argument('-a', '--a', action='store_true', help='option to have inputs_afmulti folder with subfolders and input.fasta files')
     parser.add_argument('-c', '--c', default='', help='Config file containing rows to insert into mentha db')
+    parser.add_argument('-extra', '--extra-files', dest='extra', nargs='*', required=False, default=None, help='list of extra files to process')
 
     args = parser.parse_args()
 
     datasets = []
     config_datasets = []
+    extra_datasets = []
     targets = []
+
     datasets, targets = normal_run(args)
     config_datasets = cfg_run(args)
+    extra_datasets = process_extra_files(args, args.extra)
 
-    if config_datasets == None:
+    if config_datasets == [] or config_datasets == None:
         config_datasets = []
         for d in datasets:
             config_datasets.append(pd.DataFrame(columns=d.columns))
 
-    for ds, ds_cfg, target in zip(datasets, config_datasets, targets):
+    if extra_datasets == [] or extra_datasets == None:
+        extra_datasets = []
+        for d in datasets:
+            extra_datasets.append(pd.DataFrame(columns=d.columns))
+
+    for ds, ds_cfg, ds_extra, target in zip(datasets, config_datasets, extra_datasets, targets):
+
+
+        # test_folder = 'test_folder'
+        # if not os.path.exists(test_folder):
+        #     # if the demo_folder directory is not present
+        #     # then create it.
+        #     os.makedirs(test_folder)
+
+        # outN = os.path.join(test_folder, f'NORMAL_{target.strip()}.csv')
+        # outC = os.path.join(test_folder, f'CFG_{target.strip()}.csv')
+        # outE = os.path.join(test_folder, f'EXTRA_{target.strip()}.csv')
+        # ds.to_csv(outN, sep=',', index=False)
+        # ds_cfg.to_csv(outC, sep=',', index=False)
+        # ds_extra.to_csv(outE, sep=',', index=False)
 
         result = pd.merge(ds, ds_cfg, how='outer',
                           left_on=['target uniprot id', 'target uniprot gene', 'interactor uniprot id', 'interactor uniprot gene', 'PDB id'],
@@ -741,15 +977,36 @@ def main(argv):
                 l.append(lfix)
                 dfxF.loc[len(dfxF)] = lfix
 
-        dfxF.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+
+        dfxF.drop(['normal_or_cfg'], axis=1, inplace=True)
+        dfxF['complex_included_Beltrao-Database'] = 'no'
+        # dfxF.to_csv(outN.replace('NORMAL','NORMAL_CFG_MERGE'),sep=',',index=False)
+        ds_extra['complex_included_Beltrao-Database'] = 'yes'
+
+        for i,r in ds_extra.iterrows():
+            index_list = []
+            index_list = dfxF[(dfxF['target uniprot id'] == r['target uniprot id']) &
+                              (dfxF['target uniprot gene'] == r['target uniprot gene']) &
+                              (dfxF['interactor uniprot id'] == r['interactor uniprot id']) &
+                              (dfxF['interactor uniprot gene'] == r['interactor uniprot gene'])
+                            ].index.tolist()
+            if index_list  != []:
+                #ds extra row already in dataframe
+                dfxF.loc[index_list, 'complex_included_Beltrao-Database'] = 'yes'
+                pass
+            else:
+                dfxF.loc[len(dfxF)] = r
+
+        if args.extra == None:
+            dfxF.drop(['complex_included_Beltrao-Database'], axis=1, inplace=True)
 
         dfxF.replace(np.nan, 'na', inplace=True)
 
-        dfxF.drop(['normal_or_cfg'], axis=1, inplace=True)
+        # dfxF.to_csv(outN.replace('NORMAL_CFG_MERGE', 'full_merge'), sep=',', index=False)
 
         csv_outname = args.o
         if len(datasets) == 1:
-            #csv_outname = 'total_analysis_dataset.csv'
+            csv_outname = args.o
             pass
         else:
             splitted_o = args.o.split('.')
@@ -766,6 +1023,20 @@ def main(argv):
             print(f'>>writing dataframe for target {target} -> {csv_outname}')
             dfxF.to_csv(csv_outname, index=False, quoting=csv.QUOTE_NONE, sep=',')
 
+
+THREAD_POOL = 16
+
+# This is how to create a reusable connection pool with python requests.
+session = requests.Session()
+session.mount(
+    'https://rest.uniprot.org/uniprotkb/search?query=',
+    requests.adapters.HTTPAdapter(pool_maxsize=THREAD_POOL,
+                                  max_retries=3,
+                                  pool_block=True)
+)
+
+
 if __name__ == "__main__":
     main(sys.argv[1:])
+
 
