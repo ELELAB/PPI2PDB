@@ -6,14 +6,11 @@ updated August 2023 v 1.3
 @author: Matteo Lambrughi
 """
 
-import logging
+import json
 import os
-
-import requests
-import time
+from pathlib import Path
+import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
-
 import sys
 import argparse
 import time
@@ -32,7 +29,6 @@ def make_target_interactor_sequence_files(dataframe_out):
     # get target list so we cover -x option (splitted outs) and normal (with all the targets in the same dataframe
     target_list = list(dict.fromkeys(dataframe_out['target uniprot id'].tolist()))
 
-    from pathlib import Path
     Path("inputs_afmulti").mkdir(parents=True, exist_ok=True)
 
     url = 'https://rest.uniprot.org/uniref/search?query=uniprot_id:'
@@ -708,53 +704,6 @@ def convert_ensg(ensg_list):
 
     return ensg_d
 
-def eextract_gs_sc(data, i1, i2):
-    ddata = data[(data['Protein A'] == i1) & (data['Protein B'] == i2)]
-    idata = data[(data['Protein B'] == i1) & (data['Protein A'] == i2)]
-    score ='na'
-    if not ddata.empty:
-        score = ddata['Score'].iloc[0]
-    elif not idata.empty:
-        score = idata['Score'].iloc[0]
-
-    g1 = 'na'
-    g2 = 'na'
-    uniprotData1A = data[(data['Protein A'] == i1)]
-    uniprotData1B = data[(data['Protein B'] == i1)]
-    uniprotData2A = data[(data['Protein A'] == i2)]
-    uniprotData2B = data[(data['Protein B'] == i2)]
-
-
-    if not uniprotData1A.empty:
-        # go check in b data
-        g1 = uniprotData1A['Gene A'].iloc[0]
-    elif not uniprotData1B.empty:
-        # go check in a data
-        g1 = uniprotData1B['Gene B'].iloc[0]
-
-    if not uniprotData2A.empty:
-        # go check in b data
-        g2 = uniprotData2A['Gene A'].iloc[0]
-    elif not uniprotData2B.empty:
-        # go check in a data
-        g2 = uniprotData2B['Gene B'].iloc[0]
-
-    return g1, g2, score
-
-def extract_gene(data, id):
-    # uniprotdata = data[(data['Protein A'] == id)]
-    # gene = 'na'
-    # if not uniprotdata.empty:
-    #     #go check in a data
-    #     gene = uniprotdata['Gene A'].iloc[0]
-    # else:
-    #     #go check in b data
-    #     uniprotdata = data[(data['Protein B'] == id)]
-    #     if not uniprotdata.empty:
-    #         gene = uniprotdata['Gene B'].iloc[0]
-    gene='EXTRAGENE'
-    return gene
-
 def extract_genes(data, edf_list, target_list):
     ol = []
 
@@ -794,12 +743,39 @@ def extract_helper(data, id):
 def extract_gene_fromrequest(id):
 
     url = 'https://rest.uniprot.org/uniprotkb/search?query='
-
     res = make_request(url,'get',id)
-
     gene = res['results'][0]['genes'][0]['geneName']['value']
 
     return gene
+
+def copy_folder(ex, id1, id2, af_folder_path):
+    #ex -> extra file name
+    #id1 id2 -> pair components
+
+    #clean path before extra file name and get only the name no extension
+    ex = os.path.basename(ex)
+    ex = ex.split('.')[0]
+
+    folder = id1 + '-' + id2
+
+    from_path = af_folder_path
+    to_path = 'AF_Huri_HuMAP'
+    if 'huri' in ex.lower():
+        from_path = Path(from_path).joinpath('Huri_dimers').joinpath('HuRI').joinpath(folder)
+        to_path = Path(to_path).joinpath('Huri_dimers').joinpath(folder)
+    elif 'humap' in ex.lower():
+        from_path = Path(from_path).joinpath('HuMAP_dimers').joinpath('pdb').joinpath(folder)
+        to_path = Path(to_path).joinpath('HuMAP_dimers').joinpath(folder)
+
+    if from_path.exists() and not to_path.exists():
+        shutil.copytree(from_path, to_path)
+        print(f'>>>copy from path \n {from_path} \n to \n {to_path}')
+    else:
+        s = f'destination path already exists \n {to_path}' \
+            if to_path.exists() else\
+            f'source folder does not exist \n {from_path}'
+        print(s)
+
 
 def process_extra_files(args, extra_files):
 
@@ -818,6 +794,8 @@ def process_extra_files(args, extra_files):
                                          'resolution',  # 1 -> from experiment request
                                          'dna chains', 'num ligands','PMID'])  # 2 ->
 
+
+
     # read data with pandas
     data = pd.read_csv(args.i, sep=';', converters={'Score': Decimal})
     # filtering for taxon.A = 9606 AND taxon.B = 9606 AND score >= cutoff (args.s)
@@ -832,44 +810,77 @@ def process_extra_files(args, extra_files):
     if args.extra == [] or args.extra == None:
         print('No extra files given, skipping extra files processing')
     else:
-        pair_list = []
-        ensg = []
-        for extra_file in extra_files:
-            extra_file_data = pd.read_csv(extra_file, sep=',')
-            name_serie = extra_file_data['Name']
-            for pair in name_serie:
-                id1, id2 = pair.split('-', 1)
-                pair_list.append([id1,id2])
-                if 'ENSG' in id1 and id1 not in ensg:
-                    ensg.append(id1)
-                if 'ENSG' in id2 and id2 not in ensg:
-                    ensg.append(id2)
 
-        ensg_dict = convert_ensg(ensg)
+        for e in extra_files:
+            extra_df[e] = []
+
+        pairs_scores = []
+        ensgs = []
+        for extra_file in extra_files:
+            pair_score=[]
+            extra_file_data = pd.read_csv(extra_file, sep=',')
+            #cut all scores under cutoff
+            extra_file_data = extra_file_data[extra_file_data.pDockQ >= args.extra_cutoff]
+
+            for _, r in extra_file_data.iterrows():
+                id1_kbid, id2_kbid = r['Name'].split('-', 1)
+                score = r['pDockQ']
+
+                pair_score.append([id1_kbid, id2_kbid, score])
+                if 'ENSG' in id1_kbid and id1_kbid not in ensgs:
+                    ensgs.append(id1_kbid)
+                if 'ENSG' in id2_kbid and id2_kbid not in ensgs:
+                    ensgs.append(id2_kbid)
+            pairs_scores.append([extra_file, pair_score])
+
+        #convert ensg codes that passed cutoff check
+        ensg_dict = convert_ensg(ensgs)
 
         edf = []
         for target in targets:
-            for id_pair in pair_list:
-                i1, i2 = id_pair
-                if 'ENSG' in i1:
-                    i1 = ensg_dict[i1]
-                if 'ENSG' in i2:
-                    i2 = ensg_dict[i2]
+            df_t = []
+            for i, e_ps in enumerate(pairs_scores):
+                ex = e_ps[0]
+                ps = e_ps[1]
+                for p in ps:
+                    id1_kbid = p[0]
+                    id2_kbid = p[1]
+                    id1_ensg = p[0]
+                    id2_ensg = p[1]
+                    score = p[2]
 
-                sc= 'na'
-                g1 = 'extra gene'
-                g2 = 'extra gene'
-                if i1 == target:
-                    row = [i1, g1, i2, g2, sc] + ['na']*14
-                    extra_df.loc[len(extra_df)] = row
-                elif i2 == target:
-                    row = [i2, g2, i1, g1, sc] + ['na']*14
-                    extra_df.loc[len(extra_df)] = row
-            edf.append(extra_df)
-            extra_df= extra_df[0:0]
+                    if 'ENSG' in id1_kbid:
+                        id1_kbid = ensg_dict[id1_ensg]
+                    if 'ENSG' in id2_kbid:
+                        id2_kbid = ensg_dict[id2_ensg]
 
-        #grab gene from bs for extra files
+                    g1 = 'extra gene'
+                    g2 = 'extra gene'
+                    if id1_kbid == target:
+                        row = [id1_kbid, g1, id2_kbid, g2, 'na'] + ['na']*14
+
+                        row = row + ['na']*i +[score]+['na']*(len(args.extra) -i -1)
+
+                        extra_df.loc[len(extra_df)] = row
+                        copy_folder(ex, id1_ensg, id2_ensg, args.af)
+                    elif id2_kbid == target:
+                        row = [id2_kbid, g2, id1_kbid, g1, 'na'] + ['na']*14
+
+                        row = row + ['na']*i +[score]+['na']*(len(args.extra) -i -1)
+
+                        extra_df.loc[len(extra_df)] = row
+                        copy_folder(ex, id1_ensg, id2_ensg, args.af)
+                df_t.append(extra_df)
+                extra_df = extra_df[0:0]
+
+            df = pd.concat([d for d in df_t])
+            edf.append(df)
+
+        # grab gene from bs for extra files
         datasets = extract_genes(data, edf, targets)
+
+        if not args.x:
+            datasets = [pd.concat([d for d in datasets])]
 
     return datasets
 
@@ -890,7 +901,10 @@ def download(urls, d):
         for response, url in zip(list(executor.map(grab_result, urls)), urls):
             _, ensg_number = url.split('=', 1)
             if response.status_code == 200:
-                r = response.json()
+                try:
+                    r = response.json()
+                except Exception as e:
+                    pass
                 if r['results'] != []:
                     d[ensg_number] = r['results'][0]['primaryAccession']
                 else:
@@ -913,8 +927,15 @@ def main(argv):
     parser.add_argument('-a', '--a', action='store_true', help='option to have inputs_afmulti folder with subfolders and input.fasta files')
     parser.add_argument('-c', '--c', default='', help='Config file containing rows to insert into mentha db')
     parser.add_argument('-extra', '--extra-files', dest='extra', nargs='*', required=False, default=None, help='list of extra files to process')
+    parser.add_argument('-ec','--extra-cutoff', dest='extra_cutoff', default=0.5, type=float, help='Cutoff on extra files pair pDockQ scores')
+    parser.add_argument('-af','--af-folder', dest='af', help='AF_Huri_HuMAP folder location')
 
     args = parser.parse_args()
+
+    if args.extra != None and args.af == None:
+        print('Detected extra files but no AF_Huri_HuMAP folder path, use the -af parameter')
+        print('quitting.')
+        sys.exit(0)
 
     datasets = []
     config_datasets = []
@@ -936,21 +957,6 @@ def main(argv):
             extra_datasets.append(pd.DataFrame(columns=d.columns))
 
     for ds, ds_cfg, ds_extra, target in zip(datasets, config_datasets, extra_datasets, targets):
-
-
-        # test_folder = 'test_folder'
-        # if not os.path.exists(test_folder):
-        #     # if the demo_folder directory is not present
-        #     # then create it.
-        #     os.makedirs(test_folder)
-
-        # outN = os.path.join(test_folder, f'NORMAL_{target.strip()}.csv')
-        # outC = os.path.join(test_folder, f'CFG_{target.strip()}.csv')
-        # outE = os.path.join(test_folder, f'EXTRA_{target.strip()}.csv')
-        # ds.to_csv(outN, sep=',', index=False)
-        # ds_cfg.to_csv(outC, sep=',', index=False)
-        # ds_extra.to_csv(outE, sep=',', index=False)
-
         result = pd.merge(ds, ds_cfg, how='outer',
                           left_on=['target uniprot id', 'target uniprot gene', 'interactor uniprot id', 'interactor uniprot gene', 'PDB id'],
                           right_on=['target uniprot id', 'target uniprot gene', 'interactor uniprot id', 'interactor uniprot gene', 'PDB id'])
@@ -979,9 +985,10 @@ def main(argv):
 
 
         dfxF.drop(['normal_or_cfg'], axis=1, inplace=True)
-        dfxF['complex_included_Beltrao-Database'] = 'no'
-        # dfxF.to_csv(outN.replace('NORMAL','NORMAL_CFG_MERGE'),sep=',',index=False)
-        ds_extra['complex_included_Beltrao-Database'] = 'yes'
+
+        if args.extra != [] and args.extra != None:
+            for e in args.extra:
+                dfxF[e] = 'na'
 
         for i,r in ds_extra.iterrows():
             index_list = []
@@ -992,21 +999,29 @@ def main(argv):
                             ].index.tolist()
             if index_list  != []:
                 #ds extra row already in dataframe
-                dfxF.loc[index_list, 'complex_included_Beltrao-Database'] = 'yes'
-                pass
+                for e in args.extra:
+                    dfxF.loc[index_list, e] = r[e]
+
             else:
                 dfxF.loc[len(dfxF)] = r
 
         if args.extra == None:
-            dfxF.drop(['complex_included_Beltrao-Database'], axis=1, inplace=True)
+            # for e in args.extra:
+            #     dfxF.drop([e], axis=1, inplace=True)
+            pass
+        else:
+            # fix col names
+            columns = list(dfxF.columns)
+            columns_to_fix = columns[-len(args.extra):]
+            col_fix = [os.path.basename(c).split('.', 1)[0] for c in columns_to_fix]
+            columns = columns[:-len(args.extra)] + col_fix
+            dfxF.columns = columns
 
+        dfxF.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
         dfxF.replace(np.nan, 'na', inplace=True)
-
-        # dfxF.to_csv(outN.replace('NORMAL_CFG_MERGE', 'full_merge'), sep=',', index=False)
 
         csv_outname = args.o
         if len(datasets) == 1:
-            csv_outname = args.o
             pass
         else:
             splitted_o = args.o.split('.')
