@@ -1,68 +1,89 @@
-target uniprot id,target uniprot gene,interactor uniprot id,interactor uniprot gene,mentha score,PDB id,fusion,target chain id,target starting residue,target ending residue,interactor chain id,interactor starting residue,interactor ending residue,other interactors,method,resolution,dna chains,num ligands,PMID,complex_included_Beltrao-Database
-Q7Z3C6,ATG9A,Q8NEM7,SUPT20H,0.902,na,na,na,na,na,na,na,na,na,na,na,na,na,19893488 ,no
-Q7Z3C6,ATG9A,Q04864,REL,0.583,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 unassigned1304 ,yes
-Q7Z3C6,ATG9A,P60410,KRTAP10-8,0.583,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q7Z3S9,NOTCH2NL,0.583,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 unassigned1304 ,no
-Q7Z3C6,ATG9A,Q15323,KRT31,0.583,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 unassigned1304 ,yes
-Q7Z3C6,ATG9A,P26371,KRTAP5-9,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 ,yes
-Q7Z3C6,ATG9A,Q9BYR5,KRTAP4-2,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 ,yes
-Q7Z3C6,ATG9A,Q9UHD2,TBK1,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,21903422 ,no
-Q7Z3C6,ATG9A,Q17RB8,LONRF1,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 ,yes
-Q7Z3C6,ATG9A,Q05086,UBE3A,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 ,yes
-Q7Z3C6,ATG9A,Q92609,TBC1D5,0.396,na,na,na,na,na,na,na,na,na,na,na,na,na,24603492 ,no
-Q7Z3C6,ATG9A,Q9UBQ0,VPS29,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,24603492 ,no
-Q7Z3C6,ATG9A,P35579,MYH9,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,21169990 ,no
-Q7Z3C6,ATG9A,Q16659,MAPK6,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,no
-Q7Z3C6,ATG9A,O95782,AP2A1,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24603492 ,no
-Q7Z3C6,ATG9A,Q96QK1,VPS35,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24603492 ,no
-Q7Z3C6,ATG9A,Q8TDS5,OXER1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q96CS3,FAF2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,no
-Q7Z3C6,ATG9A,P17931,LGALS3,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,no
-Q7Z3C6,ATG9A,P15884,TCF4,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q8IUC1,KRTAP11-1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q8IUB9,KRTAP19-1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q8IUC2,KRTAP8-1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q8NHP1,AKR7L,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,no
-Q7Z3C6,ATG9A,Q8IWZ5,TRIM42,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,O76011,KRT34,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,P50221,MEOX1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,O00182,LGALS9,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,no
-Q7Z3C6,ATG9A,O00214,LGALS8,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,no
-Q7Z3C6,ATG9A,A8MQ03,C9ORF169,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q9P0T4,ZNF581,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,A0PJX0,CIB4,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q6UY14,ADAMTSL4,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,B2RXF5,ZBTB42,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,O95571,ETHE1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q9NXR5,ANKRD10,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,P17568,NDUFB7,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q3LI66,KRTAP6-2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q9HD26,GOPC,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q5T749,KPRP,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q6ZNG0,ZNF620,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q92764,KRT35,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,P59022,DSCR10,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,no
-Q7Z3C6,ATG9A,Q3SY46,KRTAP13-3,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q07627,KRTAP1-1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q96MT4,LINC01600 {ECO:0000312|HGNC:HGNC:21600},0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,no
-Q7Z3C6,ATG9A,Q96NS8,CLUHP3,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,no
-Q7Z3C6,ATG9A,Q9BS75,KLHL20 {ECO:0000313|EMBL:AAH05253.1},0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,no
-Q7Z3C6,ATG9A,Q9BSH5,HDHD3,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q14525,KRT33B,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q9BYQ4,KRTAP9-2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q9BYR6,KRTAP3-3,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q9BYR7,KRTAP3-2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q5T4B2,CERCAM,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q9H5F2,C11ORF1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,yes
-Q7Z3C6,ATG9A,Q6DKI2,LGALS9C,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,no
-Q7Z3C6,ATG9A,Q6FHY5,MEOX2 {ECO:0000313|EMBL:CAG38790.1},0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,no
-Q7Z3C6,ATG9A,Q16539,MAPK14,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,19893488 ,no
-Q7Z3C6,ATG9A,P63104,YWHAZ,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,25770209 ,no
-Q7Z3C6,ATG9A,Q96CW1,AP2M1,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,24603492 ,no
-Q7Z3C6,ATG9A,Q2TAZ0,ATG2A,na,na,na,na,na,na,na,na,na,na,na,na,na,na,36347259,no
-Q7Z3C6,ATG9A,P0DPK4,NOTCH2NLC,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,yes
-Q7Z3C6,ATG9A,Q9Y2M5,KLHL20,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,yes
-Q7Z3C6,ATG9A,P50222,MEOX2,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,yes
-Q7Z3C6,ATG9A,Q3V5L5,MGAT5B,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,yes
-Q7Z3C6,ATG9A,Q8IUG1,KRTAP1-3,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,yes
-Q7Z3C6,ATG9A,P61236,YPEL3,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,yes
+target uniprot id,target uniprot gene,interactor uniprot id,interactor uniprot gene,mentha score,PDB id,fusion,target chain id,target starting residue,target ending residue,interactor chain id,interactor starting residue,interactor ending residue,other interactors,method,resolution,dna chains,num ligands,PMID,HuRI,humap
+Q9Y5F1,PCDHB12,Q9Y5E2,PCDHB7,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,0.081168
+Q9Y5F1,PCDHB12,Q9Y5F2,PCDHB11,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,0.04474
+Q9Y5F1,PCDHB12,Q9Y6N9,USH1C,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,0.090987,na
+Q9Y5F1,PCDHB12,Q3MJ62,ZSCAN23,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,0.047608,na
+Q9Y5F1,PCDHB12,P08727,KRT19,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,0.121671,na
+Q9Y5F1,PCDHB12,P0C7W6,CCDC172,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,0.043365,na
+Q9Y5F1,PCDHB12,Q86XA8,KLHL17 {ECO:0000313|EMBL:AAH45768.1},0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,na,na
+Q9Y5F1,PCDHB12,P23527,HIST1H2BO,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,0.031539,na
+Q9Y5F1,PCDHB12,Q9BT78,COPS4,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,0.339812,na
+Q9Y5F1,PCDHB12,Q15006,EMC2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,0.224032,na
+Q9Y5F1,PCDHB12,Q9H2G9,BLZF1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,0.032936,na
+P54252,ATXN3,P0CG48,UBC,1,2JRI,na,A,1,182,B;C,609;609,684;684,na,Solution NMR,na,0.0,0.0,18599482 25527291 14559776 25231079 20865150 25144244 25448680 20622874 23625928 21118805 12857950 25988170 16196087 23314748 23659897 16118278 16040601 19153604 14602712 ,na,na
+P54252,ATXN3,P55072,VCP,0.999,na,na,na,na,na,na,na,na,na,na,na,na,na,12944474 16822850 19843543 14749733 22970133 16525503 20414249 18199748 25231079 19175675 23383273 27851749 24100225 28275011 ,na,na
+P54252,ATXN3,O60260,PARK2,0.953,na,na,na,na,na,na,na,na,na,na,na,na,na,22081612 20940148 24063750 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,4YS9,na,B,278,329,B,278,329,P0AEY0,X-ray diffraction,2,0.0,1.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,2KLZ,na,A,222,263,A,222,263,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,1YZB,na,A,1,182,A,1,182,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,4WTH,na,A;B,278;278,329;329,A;B,278;278,329;329,P0AEX9,X-ray diffraction,2.25,0.0,1.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,2AGA,na,A,1,185,A,1,185,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,2DOS,na,A,1,171,A,1,171,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,2JRI,na,A,1,182,A,1,182,P0CG48,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54725,RAD23A,0.922,na,na,na,na,na,na,na,na,na,na,na,na,na,10915768 19013454 17935801 16712842 22970133 16713569 ,0.03194,na
+P54252,ATXN3,Q9UNE7,STUB1,0.914,na,na,na,na,na,na,na,na,na,na,na,na,na,21855799 20943656 19153604 21625540 ,na,na
+P54252,ATXN3,P54727,RAD23B,0.82,na,na,na,na,na,na,na,na,na,na,na,na,na,10915768 16713569 16712842 19843543 ,na,na
+P54252,ATXN3,P49841,GSK3B,0.748,na,na,na,na,na,na,na,na,na,na,na,na,na,17434145 21900206 ,na,na
+P54252,ATXN3,P04637,TP53,0.74,na,na,na,na,na,na,na,na,na,na,na,na,na,27851749 ,na,na
+P54252,ATXN3,O75376,NCOR1,0.702,na,na,na,na,na,na,na,na,na,na,na,na,na,17079677 ,na,na
+P54252,ATXN3,O15379,HDAC3,0.702,na,na,na,na,na,na,na,na,na,na,na,na,na,17079677 ,na,na
+P54252,ATXN3,Q15843,NEDD8,0.671,na,na,na,na,na,na,na,na,na,na,na,na,na,17935801 ,na,na
+P54252,ATXN3,Q14457,BECN1,0.636,na,na,na,na,na,na,na,na,na,na,na,na,na,28445460 ,na,na
+P54252,ATXN3,Q92793,CREBBP,0.569,na,na,na,na,na,na,na,na,na,na,na,na,na,12297501 17885668 ,na,na
+P54252,ATXN3,Q9BSU1,C16ORF70,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,16713569 ,na,na
+P54252,ATXN3,P63165,SUMO1,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,15952105 28275011 ,na,na
+P54252,ATXN3,O95155,UBE4B,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,14749733 16525503 ,na,na
+P54252,ATXN3,Q9UMX0,UBQLN1,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,17082820 ,na,na
+P54252,ATXN3,P67870,CSNK2B,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,18839019 ,na,na
+P54252,ATXN3,P98177,FOXO4,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,21536589 ,na,na
+P54252,ATXN3,Q13501,SQSTM1,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,25158237 ,na,na
+P54252,ATXN3,Q09472,EP300,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,12297501 ,na,na
+P54252,ATXN3,Q92831,KAT2B,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,12297501 ,na,na
+P54252,ATXN3,Q96T60,PNKP,0.396,na,na,na,na,na,na,na,na,na,na,na,na,na,25590633 ,na,na
+P54252,ATXN3,Q07817,BCL2L1,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,23562578 ,na,na
+P54252,ATXN3,P29590,PML,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,11572863 ,na,na
+P54252,ATXN3,Q14676,MDC1,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,28275011 ,na,na
+P54252,ATXN3,Q14CB8,ARHGAP19,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,16713569 ,na,na
+P54252,ATXN3,O60291,MGRN1,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,24769000 ,na,na
+P54252,ATXN3,Q96J02,ITCH,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,24865853 ,na,na
+P54252,ATXN3,P16220,CREB1,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,11572863 ,na,na
+P54252,ATXN3,Q9BUB5,MKNK1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,P50570,DNM2,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,P38936,CDKN1A,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,P04183,TK1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,Q15418,RPS6KA1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,Q9NRD5,PICK1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,16713569 ,na,na
+P54252,ATXN3,P20073,ANXA7,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,P68036,UBE2L3,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,22081612 ,na,na
+P54252,ATXN3,P51665,PSMD7,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,12944474 ,na,na
+P54252,ATXN3,P52565,ARHGDIA,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,15952105 ,na,na
+P54252,ATXN3,P78348,ASIC1,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,15952105 ,na,na
+P54252,ATXN3,Q16763,UBE2S,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,20622874 ,na,na
+P54252,ATXN3,Q9Y4K3,TRAF6,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,20622874 ,na,na
+P54252,ATXN3,Q9UKV5,AMFR,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,19661182 ,na,na
+P54252,ATXN3,Q9UBN7,HDAC6,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24685680 ,na,na
+P54252,ATXN3,Q71U36,TUBA1A,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24685680 ,na,na
+P54252,ATXN3,P17655,CAPN2,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,27731380 ,na,na
+P54252,ATXN3,P07437,TUBB,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24685680 ,na,na
+P54252,ATXN3,Q01844,EWSR1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,16713569 ,na,na
+P54252,ATXN3,Q8IYX4,DND1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,na,na
+P54252,ATXN3,Q6ZN18,AEBP2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,na,na
+P54252,ATXN3,Q6UXN7,TOMM20L,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,na,0.03213
+P54252,ATXN3,O14925,TIMM23,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
+P54252,ATXN3,Q6PGN9,PSRC1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
+P54252,ATXN3,Q96T23,RSF1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
+P54252,ATXN3,Q8N183,NDUFAF2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
+P54252,ATXN3,Q8WUZ0,BCL7C,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
+P54252,ATXN3,Q96DC9,OTUB2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,19615732 ,na,na
+P54252,ATXN3,Q92995,USP13,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,19615732 ,na,na
+P54252,ATXN3,Q9P1Y5,CAMSAP3,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
+P54252,ATXN3,Q9H3F6,KCTD10,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,19615732 ,na,na
+P54252,ATXN3,Q9ULM6,CNOT6,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
+P54252,ATXN3,Q9UM00,TMCO1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
+P54252,ATXN3,Q9H040,SPRTN,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,23042605 ,na,na
+P54252,ATXN3,P07900,HSP90AA1,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,27851749 ,na,na
+P54252,ATXN3,P12956,XRCC6,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,17885668 ,na,na
+P54252,ATXN3,P54257,HAP1,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,21386698 ,na,na
+P54252,ATXN3,P62195,PSMC5,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,17302910 ,na,na
+P54252,ATXN3,Q86TM6,SYVN1,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,24068323 ,na,na
+P54252,ATXN3,P25686,DNAJB2,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,21625540 ,na,na

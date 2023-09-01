@@ -1,0 +1,142 @@
+IF_NumResPairs: 126.0
+IF_NumRes: 68
+IF_pLDDT 72.52539902567719
+pLDDT 74.4553264971508
+if_plddt_sum 4931.727133746049
+if_plddt_av 72.52539902567719
+if_plddt_std 10.433650953825108
+ch1_plddt_av 71.45422140855347
+ch1_plddt_std 18.52420813248847
+ch2_plddt_av 76.53911267187499
+ch2_plddt_std 19.67634500878155
+plddt_av 74.4553264971508
+plddt_std 19.374622762976678
+Summary: [[72.52539902567719, 10.433650953825108, 71.45422140855347, 18.52420813248847, 76.53911267187499, 19.67634500878155, 74.4553264971508, 19.374622762976678]]
+L1: 552
+****  LIST OF INTERACTING RESIDUES ***
+Residue: 1 99 851
+Residue: 1 186 938
+Residue: 1 187 939
+Residue: 1 98 850
+Residue: 2 186 938
+Residue: 2 187 939
+Residue: 2 316 1068
+Residue: 3 186 938
+Residue: 3 187 939
+Residue: 3 185 937
+Residue: 3 189 941
+Residue: 3 98 850
+Residue: 3 188 940
+Residue: 3 156 908
+Residue: 3 158 910
+Residue: 3 97 849
+Residue: 3 99 851
+Residue: 3 157 909
+Residue: 4 186 938
+Residue: 4 187 939
+Residue: 4 246 998
+Residue: 4 332 1084
+Residue: 4 245 997
+Residue: 4 316 1068
+Residue: 5 186 938
+Residue: 5 187 939
+Residue: 6 185 937
+Residue: 6 186 938
+Residue: 6 187 939
+Residue: 6 188 940
+Residue: 6 184 936
+Residue: 6 191 943
+Residue: 7 184 936
+Residue: 7 185 937
+Residue: 7 186 938
+Residue: 7 187 939
+Residue: 7 188 940
+Residue: 7 191 943
+Residue: 7 153 905
+Residue: 7 189 941
+Residue: 7 156 908
+Residue: 7 193 945
+Residue: 8 185 937
+Residue: 8 186 938
+Residue: 8 187 939
+Residue: 9 186 938
+Residue: 9 185 937
+Residue: 9 187 939
+Residue: 10 184 936
+Residue: 10 185 937
+Residue: 10 186 938
+Residue: 10 187 939
+Residue: 10 191 943
+Residue: 10 183 935
+Residue: 10 188 940
+Residue: 10 189 941
+Residue: 10 190 942
+Residue: 11 184 936
+Residue: 11 185 937
+Residue: 11 186 938
+Residue: 11 191 943
+Residue: 11 183 935
+Residue: 11 193 945
+Residue: 11 153 905
+Residue: 12 186 938
+Residue: 13 186 938
+Residue: 13 183 935
+Residue: 14 183 935
+Residue: 14 184 936
+Residue: 14 186 938
+Residue: 14 181 933
+Residue: 14 191 943
+Residue: 14 193 945
+Residue: 14 185 937
+Residue: 15 183 935
+Residue: 17 183 935
+Residue: 18 183 935
+Residue: 20 183 935
+Residue: 20 181 933
+Residue: 20 182 934
+Residue: 23 183 935
+Residue: 23 184 936
+Residue: 23 181 933
+Residue: 24 188 940
+Residue: 24 184 936
+Residue: 27 186 938
+Residue: 27 188 940
+Residue: 27 185 937
+Residue: 27 184 936
+Residue: 27 187 939
+Residue: 27 183 935
+Residue: 27 191 943
+Residue: 28 188 940
+Residue: 30 186 938
+Residue: 30 188 940
+Residue: 31 186 938
+Residue: 31 188 940
+Residue: 31 187 939
+Residue: 31 184 936
+Residue: 31 185 937
+Residue: 31 189 941
+Residue: 31 190 942
+Residue: 34 100 852
+Residue: 34 101 853
+Residue: 34 186 938
+Residue: 34 188 940
+Residue: 34 187 939
+Residue: 34 98 850
+Residue: 34 99 851
+Residue: 35 100 852
+Residue: 35 101 853
+Residue: 36 101 853
+Residue: 39 186 938
+Residue: 39 100 852
+Residue: 43 186 938
+Residue: 338 260 1012
+Residue: 339 256 1008
+Residue: 342 260 1012
+Residue: 342 300 1052
+Residue: 342 258 1010
+Residue: 342 259 1011
+Residue: 342 263 1015
+Residue: 342 302 1054
+Residue: 551 23 775
+Residue: 551 19 771
+Residue: 552 23 775
