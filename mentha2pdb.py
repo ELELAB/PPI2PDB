@@ -8,6 +8,7 @@ updated August 2023 v 1.3
 
 import json
 import os
+from os.path import isfile, join
 from pathlib import Path
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -768,7 +769,8 @@ def copy_folder(ex, id1, id2, af_folder_path):
         to_path = Path(to_path).joinpath('HuMAP_dimers').joinpath(folder)
 
     if from_path.exists() and not to_path.exists():
-        shutil.copytree(from_path, to_path)
+        ignore_func = lambda d, files: [f for f in files if isfile(join(d, f)) and not f.endswith('.pdb')]
+        shutil.copytree(from_path, to_path, ignore=ignore_func)
         print(f'>>>copy from path \n {from_path} \n to \n {to_path}')
     else:
         s = f'destination path already exists \n {to_path}' \
@@ -902,7 +904,7 @@ def download(urls, d):
             _, ensg_number = url.split('=', 1)
             if response.status_code == 200:
                 try:
-                    r = response.json()
+                    r = json.loads(response.text)
                 except Exception as e:
                     pass
                 if r['results'] != []:
