@@ -1,5 +1,11 @@
 # Mentha2PDB
 
+#References
+
+Arnaudi M, Beltrame L, Degn K, Utichi M, Pettenella A, Scrima S, et al. MAVISp: Multi-layered Assessment of VarIants by Structure for proteins. bioRxiv. 2022. https://doi.org/10.1101/2022.10.22.513328.
+
+contacts: matl-at-cancer.dk, elenap-at-cancer.dk, elpap-at-dtu.dk
+
 #Requirements
 
 python3 (on local server: use module load python/3.7/modulefile) <br />
