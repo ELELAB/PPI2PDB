@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu May 12 09:14:52 2022
-updated August 2023 v 1.3
+updated December 2023 v 1.4
 
 @author: Matteo Lambrughi
 """
@@ -779,6 +779,29 @@ def copy_folder(ex, id1, id2, af_folder_path):
         print(s)
 
 
+def rename_folders_based_on_uniprot(ensg_to_uniprot_dict, base_path='AF_Huri_HuMAP'):
+    #Rename folders from ENSG to UniProt IDs .
+
+    huri_path = Path(base_path, 'Huri_dimers')
+    humap_path = Path(base_path, 'HuMAP_dimers')
+
+    for sub_path in [huri_path, humap_path]:
+        if sub_path.exists():
+            for folder in sub_path.iterdir():
+                if folder.is_dir():
+                    parts = folder.name.split('-')
+                    if len(parts) == 2:
+                        ensg1, ensg2 = parts
+                        uniprot1 = ensg_to_uniprot_dict.get(ensg1)
+                        uniprot2 = ensg_to_uniprot_dict.get(ensg2)
+                        if uniprot1 and uniprot2:
+                            new_name = f"{uniprot1}-{uniprot2}"
+                            new_folder_path = folder.parent / new_name
+                            folder.rename(new_folder_path)
+                            print(f"Renamed {folder.name} to {new_name}")
+
+
+
 def process_extra_files(args, extra_files):
 
     datasets = []
@@ -865,6 +888,7 @@ def process_extra_files(args, extra_files):
 
                         extra_df.loc[len(extra_df)] = row
                         copy_folder(ex, id1_ensg, id2_ensg, args.af)
+                        rename_folders_based_on_uniprot(ensg_dict)
                     elif id2_kbid == target:
                         row = [id2_kbid, g2, id1_kbid, g1, 'na'] + ['na']*14
 
@@ -872,6 +896,7 @@ def process_extra_files(args, extra_files):
 
                         extra_df.loc[len(extra_df)] = row
                         copy_folder(ex, id1_ensg, id2_ensg, args.af)
+                        rename_folders_based_on_uniprot(ensg_dict)
                 df_t.append(extra_df)
                 extra_df = extra_df[0:0]
 
@@ -885,6 +910,8 @@ def process_extra_files(args, extra_files):
             datasets = [pd.concat([d for d in datasets])]
 
     return datasets
+
+
 
 def grab_result(url):
     response = session.get(url)
@@ -1018,6 +1045,13 @@ def main(argv):
             col_fix = [os.path.basename(c).split('.', 1)[0] for c in columns_to_fix]
             columns = columns[:-len(args.extra)] + col_fix
             dfxF.columns = columns
+        # Define new column names
+        new_last_column_name = "pDockQ HuRI"
+        new_second_last_column_name = "pDockQ HuMap"
+
+        # Rename the last two columns
+        dfxF.columns.values[-1] = new_last_column_name
+        dfxF.columns.values[-2] = new_second_last_column_name
 
         dfxF.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
         dfxF.replace(np.nan, 'na', inplace=True)
