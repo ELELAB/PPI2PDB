@@ -1,4 +1,4 @@
-target uniprot id,target uniprot gene,interactor uniprot id,interactor uniprot gene,mentha score,PDB id,fusion,target chain id,target starting residue,target ending residue,interactor chain id,interactor starting residue,interactor ending residue,other interactors,method,resolution,dna chains,num ligands,PMID,HuRI,humap
+target uniprot id,target uniprot gene,interactor uniprot id,interactor uniprot gene,mentha score,PDB id,fusion,target chain id,target starting residue,target ending residue,interactor chain id,interactor starting residue,interactor ending residue,other interactors,method,resolution,dna chains,num ligands,PMID,pDockQ HuMap,pDockQ HuRI
 Q9Y5F1,PCDHB12,Q9Y5E2,PCDHB7,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,0.081168
 Q9Y5F1,PCDHB12,Q9Y5F2,PCDHB11,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,na,0.04474
 Q9Y5F1,PCDHB12,Q9Y6N9,USH1C,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,0.090987,na
@@ -13,11 +13,11 @@ Q9Y5F1,PCDHB12,Q9H2G9,BLZF1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassig
 P54252,ATXN3,P0CG48,UBC,1,2JRI,na,A,1,182,B;C,609;609,684;684,na,Solution NMR,na,0.0,0.0,18599482 25527291 14559776 25231079 20865150 25144244 25448680 20622874 23625928 21118805 12857950 25988170 16196087 23314748 23659897 16118278 16040601 19153604 14602712 ,na,na
 P54252,ATXN3,P55072,VCP,0.999,na,na,na,na,na,na,na,na,na,na,na,na,na,12944474 16822850 19843543 14749733 22970133 16525503 20414249 18199748 25231079 19175675 23383273 27851749 24100225 28275011 ,na,na
 P54252,ATXN3,O60260,PARK2,0.953,na,na,na,na,na,na,na,na,na,na,na,na,na,22081612 20940148 24063750 ,na,na
-P54252,ATXN3,P54252,ATXN3,0.943,4YS9,na,B,278,329,B,278,329,P0AEY0,X-ray diffraction,2,0.0,1.0,22129356 21780213 16194547 16525503 ,na,na
-P54252,ATXN3,P54252,ATXN3,0.943,2DOS,na,A,1,171,A,1,171,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
 P54252,ATXN3,P54252,ATXN3,0.943,2AGA,na,A,1,185,A,1,185,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
-P54252,ATXN3,P54252,ATXN3,0.943,2KLZ,na,A,222,263,A,222,263,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,2DOS,na,A,1,171,A,1,171,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,4YS9,na,B,278,329,B,278,329,P0AEY0,X-ray diffraction,2,0.0,1.0,22129356 21780213 16194547 16525503 ,na,na
 P54252,ATXN3,P54252,ATXN3,0.943,2JRI,na,A,1,182,A,1,182,P0CG48,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,2KLZ,na,A,222,263,A,222,263,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
 P54252,ATXN3,P54252,ATXN3,0.943,4WTH,na,A;B,278;278,329;329,A;B,278;278,329;329,P0AEX9,X-ray diffraction,2.25,0.0,1.0,22129356 21780213 16194547 16525503 ,na,na
 P54252,ATXN3,P54252,ATXN3,0.943,1YZB,na,A,1,182,A,1,182,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
 P54252,ATXN3,P54725,RAD23A,0.922,na,na,na,na,na,na,na,na,na,na,na,na,na,10915768 19013454 17935801 16712842 22970133 16713569 ,0.03194,na
