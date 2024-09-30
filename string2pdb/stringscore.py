@@ -15,8 +15,8 @@ def parse_arguments():
     parser.add_argument(
         "-t", 
         "--threshold",
-        type=int,
-        default=700,
+        type=float,
+        default=0.7,
     )
 
     parser.add_argument(
@@ -85,7 +85,7 @@ def get_interactors(string_id, threshold, network):
             tscore = float(columns[12])
             
 
-            if score >= threshold / 1000:
+            if score >= threshold:
                 interactors.append((target_protein, target_id, interactor, interactor_id, score, escore, dscore, tscore))
 
         return interactors
