@@ -4,32 +4,6 @@ import requests
 import argparse
 import csv
 
-
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "identifier", 
-        type=str,
-    )
-    
-    parser.add_argument(
-        "-t", 
-        "--threshold",
-        type=float,
-        default=0.7,
-    )
-
-    parser.add_argument(
-        "-n",
-        "--network",
-        type=str,
-        default= "physical",
-        choices=["functional", "physical"]
-    )
-
-    return parser.parse_args()
-
-
 def get_string_id(identifier):
     base_url = "https://string-db.org/api/tsv/get_string_ids"
     params = {
@@ -95,7 +69,31 @@ def get_interactors(string_id, threshold, network):
         return None
 
 def main():
-    args = parse_arguments()
+    parser = argparse.ArgumentParser(
+        description="Retrieval of interaction data from the STRING database for a given identifier."
+    )
+    parser.add_argument(
+        "identifier", 
+        type=str,
+        help="STRING identifier or gene name to retrieve interactors for."
+    )
+    parser.add_argument(
+        "-t", 
+        "--threshold",
+        type=float,
+        default=0.7,
+        help="Minimum STRING confidence score for interaction filtering (default: 0.7)."
+    )
+    parser.add_argument(
+        "-n",
+        "--network",
+        type=str,
+        default="physical",
+        choices=["functional", "physical"],
+        help="STRING network type to be used: 'physical' for physical interactions, 'functional' for all interactions (default: 'physical')."
+    )
+
+    args = parser.parse_args()
     string_id = get_string_id(args.identifier)
     
     if string_id:
