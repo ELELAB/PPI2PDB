@@ -3,31 +3,8 @@
 import requests
 import argparse
 import csv
-
-def get_string_id(identifier):
-    base_url = "https://string-db.org/api/tsv/get_string_ids"
-    params = {
-        'identifier': identifier,  
-        'species': 9606,         
-        'limit': 1,
-        'caller_identity': "MAVISp_web_app"     
-    }
-
-    try:
-        string_response = requests.get(base_url, params=params)
-        string_response.raise_for_status()
-        data = string_response.text.strip().splitlines()  
-        if len(data) > 1:
-            columns = data[1].split('\t')  
-            return columns[1]  
-        else:
-            print(f"Error: No STRING identifier found for {identifier}")
-            return None
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error: Unable to get data ({e})")
-        return None
-
+import pandas as pd
+from io import StringIO
 
 def get_interactors(string_id, threshold, network):
     base_url = "https://string-db.org/api/tsv/interaction_partners"
@@ -43,30 +20,30 @@ def get_interactors(string_id, threshold, network):
     try:
         interactors_response = requests.get(base_url, params=params)
         interactors_response.raise_for_status()
-
-        data = interactors_response.text.strip().splitlines()
-        interactors = []
-
-        for line in data[1:]:
-            columns = line.split('\t')
-            target_protein = columns[2]
-            target_id = columns[0]
-            interactor = columns[3]
-            interactor_id = columns[1]
-            score = float(columns[5])
-            escore = float(columns[10])
-            dscore = float(columns[11])
-            tscore = float(columns[12])
-            
-
-            if score >= threshold:
-                interactors.append((target_protein, target_id, interactor, interactor_id, score, escore, dscore, tscore))
-
-        return interactors
-
     except requests.exceptions.RequestException as e:
         print(f"Error: Unable to get interaction data ({e})")
         return None
+
+    # Data parsing logic outside try-except to ensure it's executed if no exception occurs
+    data = interactors_response.text.strip().splitlines()
+    interactors = []
+
+    for line in data[1:]:
+        columns = line.split('\t')
+        target_protein = columns[2]
+        target_id = columns[0]
+        interactor = columns[3]
+        interactor_id = columns[1]
+        score = float(columns[5])
+        escore = float(columns[10])
+        dscore = float(columns[11])
+        tscore = float(columns[12])
+
+        if score >= threshold:
+            interactors.append((target_protein, target_id, interactor, interactor_id, score, escore, dscore, tscore))
+
+    return interactors
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -94,7 +71,32 @@ def main():
     )
 
     args = parser.parse_args()
-    string_id = get_string_id(args.identifier)
+    
+    base_url = "https://string-db.org/api/tsv/get_string_ids"
+    params = {
+        'identifier': args.identifier,  
+        'species': 9606,         
+        'limit': 0,  
+        'caller_identity': "MAVISp_web_app"     
+    }
+    try:
+        string_response = requests.get(base_url, params=params)
+        string_response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Error: Unable to get data ({e})")
+        return
+
+    # Read tsv data into pandas dataframe:
+    data = pd.read_csv(StringIO(string_response.text), sep='\t')
+
+    # Check if identifier is in the dataframe
+    if args.identifier in data['preferredName'].values:
+        if data.shape[0] > 1:
+            print(f"Warning: Multiple STRING IDs found for {args.identifier}. Using the first one: {data.iloc[0, 1]}")
+        string_id = data.iloc[0]['stringId']
+    else:
+        print(f"Error: No STRING identifier found for {args.identifier} in the results.")
+        return
     
     if string_id:
         interactors = get_interactors(string_id, args.threshold, args.network)
