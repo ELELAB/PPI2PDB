@@ -24,23 +24,15 @@ def get_interactors(string_id, threshold, network):
         print(f"Error: Unable to get interaction data ({e})")
         return None
 
-    # Data parsing logic outside try-except to ensure it's executed if no exception occurs
-    data = interactors_response.text.strip().splitlines()
-    interactors = []
+    # Read tsv data into a pandas dataframe
+    interactors_df = pd.read_csv(StringIO(interactors_response.text), sep='\t')
 
-    for line in data[1:]:
-        columns = line.split('\t')
-        target_protein = columns[2]
-        target_id = columns[0]
-        interactor = columns[3]
-        interactor_id = columns[1]
-        score = float(columns[5])
-        escore = float(columns[10])
-        dscore = float(columns[11])
-        tscore = float(columns[12])
+    # Filter interactors
+    filtered_interactors = interactors_df[interactors_df['score'] >= threshold]
 
-        if score >= threshold:
-            interactors.append((target_protein, target_id, interactor, interactor_id, score, escore, dscore, tscore))
+    # Extract columns
+    interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'preferredName_B', 'stringId_B', 
+                                        'score', 'escore', 'dscore', 'tscore']].values.tolist()
 
     return interactors
 
