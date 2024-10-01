@@ -39,12 +39,12 @@ def get_interactors(string_id, threshold, network):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Retrieval of interaction data from the STRING database for a given identifier."
+        description="Retrieval of interaction data from the STRING database for a given gene name."
     )
     parser.add_argument(
         "identifier", 
         type=str,
-        help="STRING identifier or gene name to retrieve interactors for."
+        help="Gene name to retrieve interactors for."
     )
     parser.add_argument(
         "-t", 
@@ -81,34 +81,35 @@ def main():
     # Read tsv data into pandas dataframe:
     data = pd.read_csv(StringIO(string_response.text), sep='\t')
 
-    # Check if identifier is in the dataframe
-    if args.identifier in data['preferredName'].values:
-        if data.shape[0] > 1:
-            print(f"Warning: Multiple STRING IDs found for {args.identifier}. Using the first one: {data.iloc[0, 1]}")
-        string_id = data.iloc[0]['stringId']
-    else:
+    # Check if identifier is in data:
+    if args.identifier not in data['preferredName'].values:
         print(f"Error: No STRING identifier found for {args.identifier} in the results.")
         return
-    
-    if string_id:
-        interactors = get_interactors(string_id, args.threshold, args.network)
-        if interactors:
-            output_file = f"{args.identifier}_string_interactors.tsv"
-            
-            with open(output_file, 'w', newline='') as tsvfile:
-                tsv_writer = csv.writer(tsvfile, delimiter='\t')
-                
-                tsv_writer.writerow(['Target_protein', 'Target_id', 'Interactor', 'Interactor_id', 'String_score', 'Experimental_score', 'Database_score', 'Textmining_score'])
-                
-                for target_protein, target_id, interactor, interactor_id, score, escore, dscore, tscore in interactors:
-                    tsv_writer.writerow([target_protein, target_id, interactor, interactor_id, score, escore, dscore, tscore])
-            
-            print(f"Results saved to {output_file}")
-        else:
-            print("No interactors found.")
-    else:
-        print("No STRING ID found.")
 
+    # Handle case of multiple STRING IDs found
+    if data.shape[0] > 1:
+        print(f"Warning: Multiple STRING IDs found for {args.identifier}. Using the first one: {data.iloc[0, 1]}")
+    string_id = data.iloc[0]['stringId']
+
+    # Fetch interactors
+    interactors = get_interactors(string_id, args.threshold, args.network)
+    if not interactors:
+        print("No interactors found.")
+        return
+
+    # Output CSV file
+    output_file = f"{args.identifier}_string_interactors.csv"
+    
+    with open(output_file, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile, delimiter=',')
+        csv_writer.writerow(['Target_protein', 'Target_id', 'Interactor', 'Interactor_id', 'String_score', 
+                             'Experimental_score', 'Database_score', 'Textmining_score'])
+        
+        for preferredName_A, stringId_A, preferredName_B, stringId_B, score, escore, dscore, tscore in interactors:
+            csv_writer.writerow([preferredName_A, stringId_A, preferredName_B, stringId_B, score, escore, dscore, tscore])
+
+    print(f"Results saved to {output_file}")
 
 if __name__ == "__main__":
     main()
+    
