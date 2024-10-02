@@ -40,13 +40,13 @@ def get_interactors(string_id, threshold, network):
         print(f"Error: Unable to get interaction data ({e})")
         return None
 
-    # Read tsv data into a pandas dataframe
+    # Read tsv data into pandas dataframe:
     interactors_df = pd.read_csv(StringIO(interactors_response.text), sep='\t')
 
-    # Filter interactors
+    # Filter interactors:
     filtered_interactors = interactors_df[interactors_df['score'] >= threshold]
 
-    # Extract columns
+    # Extract columns:
     interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'preferredName_B', 'stringId_B', 
                                         'score', 'escore', 'dscore', 'tscore']].values.tolist()
 
@@ -60,7 +60,7 @@ def main():
     parser.add_argument(
         "identifier", 
         type=str,
-        help="Gene name to retrieve interactors for."
+        help="HUGO Gene name to retrieve interactors for."
     )
     parser.add_argument(
         "-t", 
@@ -102,18 +102,21 @@ def main():
         print(f"Error: No STRING identifier found for {args.identifier} in the results.")
         return
 
-    # Handle case of multiple STRING IDs found
+    # Handle case of multiple STRING IDs found:
     if data.shape[0] > 1:
-        print(f"Warning: Multiple STRING IDs found for {args.identifier}. Using the first one: {data.iloc[0, 1]}")
-    string_id = data.iloc[0]['stringId']
+        print(f"Warning: Multiple STRING IDs found for {args.identifier}. Selecting STRING ID based on preferred name.")
+        matching_row = data[data['preferredName'] == args.identifier]
+        string_id = matching_row.iloc[0]['stringId']
+    else:
+        string_id = data.iloc[0]['stringId']
 
-    # Fetch interactors
+    #Get interactors:
     interactors = get_interactors(string_id, args.threshold, args.network)
     if not interactors:
         print("No interactors found.")
         return
 
-    # Output CSV file
+    # Output CSV file:
     output_file = f"{args.identifier}_string_interactors.csv"
     
     with open(output_file, 'w', newline='') as csvfile:
