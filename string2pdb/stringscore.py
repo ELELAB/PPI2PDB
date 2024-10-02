@@ -110,7 +110,7 @@ def main():
     else:
         string_id = data.iloc[0]['stringId']
 
-    #Get interactors:
+    # Get interactors:
     interactors = get_interactors(string_id, args.threshold, args.network)
     if not interactors:
         print("No interactors found.")
