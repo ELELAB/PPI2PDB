@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # STRING2PDB 
-# Copyright (C) 2024  Cancer Structural Biology-Danish Cancer Institute
+# Copyright (C) 2024  Eleni Kiahaki and Matteo Tiberti, Cancer Structural Biology, Danish Cancer Institute
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
