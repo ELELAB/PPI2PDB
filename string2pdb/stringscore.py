@@ -18,40 +18,8 @@
 
 import requests
 import argparse
-import csv
 import pandas as pd
 from io import StringIO
-
-def get_interactors(string_id, threshold, network):
-    base_url = "https://string-db.org/api/tsv/interaction_partners"
-    params = {
-        'identifier': string_id,  
-        'species': 9606,
-        'required_score': threshold,
-        'limit': 0,
-        'network_type': network,
-        'caller_identity': "MAVISp_web_app"
-    }
-
-    try:
-        interactors_response = requests.get(base_url, params=params)
-        interactors_response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print(f"Error: Unable to get interaction data ({e})")
-        return None
-
-    # Read tsv data into pandas dataframe:
-    interactors_df = pd.read_csv(StringIO(interactors_response.text), sep='\t')
-
-    # Filter interactors:
-    filtered_interactors = interactors_df[interactors_df['score'] >= threshold]
-
-    # Extract columns:
-    interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'preferredName_B', 'stringId_B', 
-                                        'score', 'escore', 'dscore', 'tscore']].values.tolist()
-
-    return interactors
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -110,25 +78,45 @@ def main():
     else:
         string_id = data.iloc[0]['stringId']
 
-    # Get interactors:
-    interactors = get_interactors(string_id, args.threshold, args.network)
-    if not interactors:
-        print("No interactors found.")
+    # Get interactors from STRING API
+    interactors_url = "https://string-db.org/api/tsv/interaction_partners"
+    interactors_params = {
+        'identifier': string_id,  
+        'species': 9606,
+        'required_score': args.threshold,
+        'limit': 0,
+        'network_type': args.network,
+        'caller_identity': "MAVISp_web_app"
+    }
+
+    try:
+        interactors_response = requests.get(interactors_url, params=interactors_params)
+        interactors_response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Error: Unable to get interaction data ({e})")
         return
+
+    # Read tsv data into pandas dataframe:
+    interactors_df = pd.read_csv(StringIO(interactors_response.text), sep='\t')
+
+    # Filter interactors:
+    filtered_interactors = interactors_df[interactors_df['score'] >= args.threshold]
+
+    if filtered_interactors.empty:
+        print(f"No interactors found with score > {args.threshold}.")
+        return
+
+    # Extract columns:
+    interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'preferredName_B', 'stringId_B', 
+                                        'score', 'escore', 'dscore', 'tscore']]
 
     # Output CSV file:
     output_file = f"{args.identifier}_string_interactors.csv"
-    
-    with open(output_file, 'w', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile, delimiter=',')
-        csv_writer.writerow(['Target_protein', 'Target_id', 'Interactor', 'Interactor_id', 'String_score', 
-                             'Experimental_score', 'Database_score', 'Textmining_score'])
-        
-        for preferredName_A, stringId_A, preferredName_B, stringId_B, score, escore, dscore, tscore in interactors:
-            csv_writer.writerow([preferredName_A, stringId_A, preferredName_B, stringId_B, score, escore, dscore, tscore])
+    interactors.to_csv(output_file, index=False, header=['Target_protein', 'Target_id', 'Interactor', 'Interactor_id', 
+                                                         'String_score', 'Experimental_score', 'Database_score', 
+                                                         'Textmining_score'])
 
     print(f"Results saved to {output_file}")
 
 if __name__ == "__main__":
     main()
-    
