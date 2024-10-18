@@ -17,7 +17,7 @@ Ensure you have the following installed:
 2. `<threshold>` (optional, float): String_score threshold. Default for MAVISp: **0.7**. 
    To adjust the threshold, specify with `-t <threshold>`.
 
-   **Other recommended thresholds for customized searches:**
+   **Other recommended thresholds for customized searches along with the confidence of interaction:**
 
    | Confidence | Threshold |
    |------------|-----------|
@@ -38,17 +38,17 @@ Ensure you have the following installed:
    ```
 2. Run the script:
    ```bash
-   python stringscore.py <identifier> [-t <threshold>] [-n <network>]
+   ./stringscore <identifier> [-t <threshold>] [-n <network>]
    ```
 ## Example for MAVISp run:
 ### Run the bash script run.sh in `example/` folder as bash run.sh it will perform: <br />
    ```bash
-   python stringscore.py RAD51B
+   ./stringscore RAD51B
    ```
 ## Customized example of run:
 ### Run the bash script run.sh in `example2/` folder as bash run.sh it will perform: <br />
    ```bash
-   python stringscore.py BARD1 -t 0.9 -n functional
+   ./stringscore BARD1 -t 0.9 -n functional
    ```
 ## Output:
 The output is a csv file generated in the working directory and named after the input HUGO Gene Name:
