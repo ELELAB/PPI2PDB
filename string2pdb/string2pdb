@@ -1,0 +1,272 @@
+#!/usr/bin/env python3
+
+import requests
+import argparse
+import pandas as pd
+from io import StringIO
+
+def query_pdb(protein_name):
+    """Query PDB for entries based on the GENE NAME and with source organism ID: 9606."""
+    url = "https://search.rcsb.org/rcsbsearch/v2/query"
+    
+    payload = {
+        "query": {
+            "type": "group",
+            "logical_operator": "and",
+            "nodes": [
+                {
+                    "type": "terminal",
+                    "service": "text",
+                    "parameters": {
+                        "attribute": "rcsb_entity_source_organism.rcsb_gene_name.value",
+                        "operator": "exact_match",
+                        "negation": False,
+                        "value": protein_name
+                    }
+                },
+                {
+                    "type": "terminal",
+                    "service": "text",
+                    "parameters": {
+                        "attribute": "rcsb_entity_source_organism.taxonomy_lineage.id",
+                        "operator": "exact_match",
+                        "negation": False,
+                        "value": "9606"  # Human
+                    }
+                }
+            ],
+            "label": "text"
+        },
+        "return_type": "entry",
+        "request_options": {
+            "paginate": {
+                "start": 0,
+                "rows": 10000
+            },
+            "results_content_type": [
+                "experimental"
+            ],
+            "sort": [
+                {
+                    "sort_by": "score",
+                    "direction": "desc"
+                }
+            ],
+            "scoring_strategy": "combined"
+        }
+    }
+    
+    headers = {'Content-Type': 'application/json'}
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        return response.json().get("result_set", [])
+    except requests.exceptions.RequestException as e:
+        print(f"Error querying PDB for {protein_name}: {e}")
+        return []
+
+def find_common_pdbs(target_entries, interactor_name):
+    """Find common PDB entries between target and interactor."""
+    interactor_pdbs = query_pdb(interactor_name)
+
+    if not interactor_pdbs:  # Check if no PDB entries were found
+        print(f"No PDB entries found for interactor: {interactor_name}.")
+        return "NA"  
+
+    # Find common PDB IDs
+    target_ids = set(entry['identifier'] for entry in target_entries)
+    interactor_ids = set(entry['identifier'] for entry in interactor_pdbs)
+
+    common_ids = target_ids & interactor_ids
+    
+    if common_ids:
+        return ", ".join(common_ids)  # Store common PDBs as a string
+    else:
+        return "NA" 
+
+def get_experiment_details(common_pdb_ids):
+    """This function retrieves experiment details for the given PDB IDs, including experimental method and resolution."""
+    
+    # Initialize a dict for experiment details:
+    experiment_details = {
+        'PDB_ID': common_pdb_ids,
+        'Experiment_Type': [],
+        'Resolution': []
+    }
+    
+    for pdb in common_pdb_ids.split(","):
+        pdb = pdb.strip()
+        url = f'https://www.ebi.ac.uk/pdbe/api/pdb/entry/experiment/{pdb.lower()}'
+        
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data for PDB ID {pdb}: {e}")
+            exit(1)
+        
+        # Check if there is data for the given PDB ID:
+        if pdb.lower() not in data or not data[pdb.lower()]:  
+            print(f"No data found for PDB ID {pdb}.")
+            experiment_details['Experiment_Type'].append('NA')
+            experiment_details['Resolution'].append('NA')
+            continue
+
+        # Retrieve the first experiment
+        experiment_data = data[pdb.lower()][0]
+
+        # Retrieve experimental method or  'NA' if missing:
+        experimental_method = experiment_data.get('experimental_method', 'NA')
+        if experimental_method in [None, 'NA']:  
+            experimental_method = 'NA'
+        
+        # Retrieve resolution or 'NA' if missing:
+        resolution = experiment_data.get('resolution', 'NA')
+        if resolution in [None, 'NA']:  
+            resolution = 'NA'
+        else:
+            resolution = str(resolution)  # Convert resolution to string
+
+        # Append details to the lists in the dict:
+        experiment_details['Experiment_Type'].append(experimental_method)
+        experiment_details['Resolution'].append(resolution)
+
+    # Convert lists to strings for output:
+    return {
+        'PDB_ID': experiment_details['PDB_ID'],
+        'Experiment_Type': ", ".join(experiment_details['Experiment_Type']),
+        'Resolution': ", ".join(experiment_details['Resolution'])  
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Retrieval of interaction data from the STRING database for a given gene name."
+    )
+    parser.add_argument(
+        "identifier", 
+        type=str,
+        help="HUGO Gene name to retrieve interactors for."
+    )
+    parser.add_argument(
+        "-t", 
+        "--threshold",
+        type=float,
+        default=0.7,
+        help="Minimum STRING confidence score for interaction filtering (default: 0.7)."
+    )
+    parser.add_argument(
+        "-n",
+        "--network",
+        type=str,
+        default="physical",
+        choices=["functional", "physical"],
+        help="STRING network type to be used: 'physical' for physical interactions, 'functional' for all interactions (default: 'physical')."
+    )
+
+    args = parser.parse_args()
+    
+    
+    base_url = "https://string-db.org/api/tsv/get_string_ids"
+    params = {
+        'identifier': args.identifier,  
+        'species': 9606,         
+        'limit': 0,  
+        'caller_identity': "MAVISp_web_app"     
+    }
+    
+    try:
+        string_response = requests.get(base_url, params=params)
+        string_response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Error: Unable to get data ({e})")
+        exit(1)
+
+    # Read TSV data into pandas DataFrame
+    data = pd.read_csv(StringIO(string_response.text), sep='\t')
+
+    # Check if identifier is in data
+    if args.identifier not in data['preferredName'].values:
+        print(f"Error: No STRING identifier found for {args.identifier} in the results.")
+        exit(1)
+
+    # Handle case of multiple STRING IDs found
+    if data.shape[0] > 1:
+        print(f"Warning: Multiple STRING IDs found for {args.identifier}. Selecting STRING ID based on preferred name.")
+        matching_row = data[data['preferredName'] == args.identifier]
+        string_id = matching_row.iloc[0]['stringId']
+    else:
+        string_id = data.iloc[0]['stringId']
+
+    # Get interactors from STRING API
+    interactors_url = "https://string-db.org/api/tsv/interaction_partners"
+    interactors_params = {
+        'identifier': string_id,  
+        'species': 9606,
+        'required_score': args.threshold,
+        'limit': 0,
+        'network_type': args.network,
+        'caller_identity': "MAVISp_web_app"
+    }
+
+    try:
+        interactors_response = requests.get(interactors_url, params=interactors_params)
+        interactors_response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Error: Unable to get interaction data ({e})")
+        exit(1)
+
+    # Read TSV data into pandas DataFrame:
+    interactors_df = pd.read_csv(StringIO(interactors_response.text), sep='\t')
+
+    # Filter interactors:
+    filtered_interactors = interactors_df[interactors_df['score'] >= args.threshold].copy()
+
+    if filtered_interactors.empty:
+        print(f"No interactors found with score >= {args.threshold}.")
+        exit(0)
+
+    # Extract relevant columns from filtered interactors:
+    interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'preferredName_B', 'stringId_B', 
+                                        'score', 'escore', 'dscore', 'tscore']].copy()
+
+    # Query PDB for the target protein:
+    target_entries = query_pdb(args.identifier)
+    
+    if not target_entries:
+        print(f"Warning: No PDB entries found for target {args.identifier}. Proceeding without PDB mapping.")
+        interactors[['PDB_ID', 'Experiment_Type', 'Resolution']] = 'NA'
+    else:
+        # Initialize list to store interactor details:
+        interactor_details = []
+
+        # Loop through interactors and find common PDBs
+        for interactor_name in interactors['preferredName_B']:
+            common_pdb_ids = find_common_pdbs(target_entries, interactor_name)
+            if common_pdb_ids != "NA": 
+                interactor_details.append(get_experiment_details(common_pdb_ids))
+            else:
+                interactor_details.append({'PDB_ID': 'NA', 'Experiment_Type': 'NA', 'Resolution': 'NA'})
+
+        # Expand the dictionary into DataFrame columns:
+        interactors[['PDB_ID', 'Experiment_Type', 'Resolution']] = pd.DataFrame(interactor_details)
+
+
+    # Rename columns of Dataframe:
+    interactors = interactors.rename(columns={
+        'preferredName_A': 'Target_Protein',
+        'preferredName_B': 'Interactor',
+        'stringId_A': 'StringID_Target',
+        'stringId_B': 'StringID_Interactor',
+        'score':'String_Score'
+    })
+
+    # Output CSV file
+    output_file = f"{args.identifier}_string_interactors.csv"
+    interactors.to_csv(output_file, index=False)
+    print(f"Results saved to {output_file}")
+
+if __name__ == "__main__":
+    main()
