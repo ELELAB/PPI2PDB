@@ -1,4 +1,4 @@
-Target_protein,Target_id,Target_Uniprot_AC,Interactor,Interactor_id,Interactor_UniProt_AC,String_score,escore,dscore,tscore
+Target_protein,Target_id,Target_Uniprot_AC,Interactor,Interactor_id,Interactor_UniProt_AC,String_score,Experimental_score,Database_score,Textmining_score
 BARD1,9606.ENSP00000260947,Q99728,UIMC1,9606.ENSP00000421926,Q96RL1,0.999,0.477,0.9,0.996
 BARD1,9606.ENSP00000260947,Q99728,RAD51,9606.ENSP00000493712,Q06609,0.999,0.758,0.72,0.993
 BARD1,9606.ENSP00000260947,Q99728,RBBP8,9606.ENSP00000382628,Q99708,0.999,0.994,0.7,0.917

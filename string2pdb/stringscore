@@ -21,12 +21,9 @@ import argparse
 import pandas as pd
 from io import StringIO
 import re
+import os
 
-# Load the aliases file:
-# I assume the file must be moved to /data/databases/ 
-aliases_df = pd.read_csv('/data/user/elenikia/9606.protein.aliases.v12.0.txt', sep='\t', header=None, names=['STRING_ID', 'Alias', 'Source'])
-
-def string2uniprot(string_id):
+def string2uniprot(string_id, aliases_df):
 
     # Regex to check if the format matches a reviewed Uniprot entry:
     reviewed_pattern = re.compile(r'^[A-Z][0-9][A-Z0-9]{4}$')  
@@ -35,35 +32,23 @@ def string2uniprot(string_id):
     ids_rows = aliases_df[(aliases_df['STRING_ID'] == string_id) & 
                       (aliases_df['Source'] == 'Ensembl_HGNC_uniprot_ids')]
 
-    # If no results, check for Uniprot_AC alternatively:
+    # If no results, find the UniProt_DR_neXtProt row alternatively:
     if ids_rows.empty:
-        AC_rows = aliases_df[(aliases_df['STRING_ID'] == string_id) & 
-                      (aliases_df['Source'] == 'UniProt_AC')]
+        neXtProt_row = aliases_df[(aliases_df['STRING_ID'] == string_id) & 
+                      (aliases_df['Source'] == 'UniProt_DR_neXtProt')]
 
-        uniprot_acs = AC_rows['Alias'].tolist()
-
-        if not uniprot_acs:
-            print(f"Error: No Uniprot AC found for String ID {string_id}. Exiting")
+        if neXtProt_row.shape[0] != 1:
+            print(f"Error: Error parsing aliases file. Expected exactly one UniProt_DR_neXtProt alias for {string_id} and found {neXtProt_row.shape[0]}. Exiting")
             exit(1)
 
-        # Filter UniProt ACs that match the reviewed pattern:
-        reviewed_acs = [ac for ac in uniprot_acs if reviewed_pattern.match(ac)]
+        uniprot_ac = str(neXtProt_row['Alias'].values[0])[3:]
 
-        if not reviewed_acs:
-            print(f"Error: No valid reviewed UniProt AC found for STRING ID {string_id}")
+        # Sanity check for Uniprot_AC format:
+        if not reviewed_pattern.match(uniprot_ac):
+            print(f"Error: No valid reviewed Uniprot AC found for String ID {string_id}. Exiting")
             exit(1)
 
-        if len(reviewed_acs) > 1:
-            # Here (unlike what I do when reviewed_ids >= 1), I return only the most recent one, 
-            # because the rest are either unreviewed, or older versions.
-            # Return the most recent one:
-            reviewed_acs.sort()
-            most_recent_ac = reviewed_acs[-1]
-        else:
-            # Return the Unique:
-            reviewed_acs[0]
-        
-        return [most_recent_ac]
+        return [uniprot_ac]
     
     # Extract the UniProt IDs:
     uniprot_ids = ids_rows['Alias'].tolist()
@@ -75,15 +60,8 @@ def string2uniprot(string_id):
     if not reviewed_ids:
         print(f"Error: No valid reviewed UniProt ID found for STRING ID {string_id}")
         exit(1)
-
-        # The script continues here if reviewed_ids >= 1.
-        # Not sure if here I should keep all of them and print them in different rows, but I think Mentha does it this way.
-        # See example of target:TP53 :For the interactor CDKN2A Mentha lists both IDs as interactors: Q8N726, P42771 in different rows
-        # In that case, it means that different proteins(not just isoforms) are encoded by same gene, so all of them
-        # should be present as different interactors.
     
     return reviewed_ids
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -93,6 +71,13 @@ def main():
         "identifier", 
         type=str,
         help="HUGO Gene name to retrieve interactors for."
+    )
+    parser.add_argument(
+    "aliases_file_path", 
+    type=str,
+    nargs="?",
+    default="/data/databases/STRING/9606.protein.aliases.v12.0.txt",
+    help="Path to the aliases file. Default:/data/databases/STRING/9606.protein.aliases.v12.0.txt"
     )
     parser.add_argument(
         "-t", 
@@ -111,6 +96,14 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if not os.path.exists(args.aliases_file_path):
+        print(f"Error: Aliases file not found at {args.aliases_file_path}. Please provide a valid path.")
+        exit(1)
+
+    # Load aliases file from argument:
+    aliases_df = pd.read_csv(args.aliases_file_path, sep='\t', header=None, names=['STRING_ID', 'Alias', 'Source'])
+
     
     base_url = "https://string-db.org/api/tsv/get_string_ids"
     params = {
@@ -131,7 +124,7 @@ def main():
     data = pd.read_csv(StringIO(string_response.text), sep='\t')
 
     # Convert each String_Id to UniProt AC and store in a new column:
-    data['UniProt_AC'] = data['stringId'].apply(string2uniprot)
+    data['UniProt_AC'] = data['stringId'].apply(lambda x: string2uniprot(x, aliases_df))
 
     # Explode the DataFrame for rows where UniProt_AC has multiple values:
     data = data.explode('UniProt_AC')
@@ -144,7 +137,7 @@ def main():
     # Initialize matching_row to None:
     matching_row = None 
 
-    # Check for multiple rows with different STRING IDs
+    # Check for multiple rows with different STRING IDs:
     unique_string_ids = data['stringId'].nunique()
 
     if unique_string_ids > 1:
@@ -184,15 +177,15 @@ def main():
     filtered_interactors = interactors_df[(interactors_df['score'] >= args.threshold) & (interactors_df['dscore'] > 0)].copy()
 
     # Assign new columns:
-    filtered_interactors.loc[:, 'Interactor_UniProt_AC'] = filtered_interactors['stringId_B'].apply(string2uniprot)
+    filtered_interactors.loc[:, 'Interactor_UniProt_AC'] = filtered_interactors['stringId_B'].apply(lambda x: string2uniprot(x, aliases_df))
     filtered_interactors['Target_Uniprot_AC'] = args.identifier
-
-    # Explode DataFrame for UniProt AC entries if multiple reviewed IDs found:
-    filtered_interactors = filtered_interactors.explode('Interactor_UniProt_AC')
 
     if filtered_interactors.empty:
         print(f"No interactors found with score >= {args.threshold}.")
         exit(0)
+
+    # Explode DataFrame for UniProt AC entries if multiple reviewed IDs found:
+    filtered_interactors = filtered_interactors.explode('Interactor_UniProt_AC')
 
     # Extract columns:
     interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'Target_Uniprot_AC', 'preferredName_B', 'stringId_B', 'Interactor_UniProt_AC',
@@ -201,8 +194,8 @@ def main():
     # Output CSV file:
     output_file = f"{args.identifier}_string_interactors.csv"
     interactors.to_csv(output_file, index=False, header=['Target_protein', 'Target_id', 'Target_Uniprot_AC', 'Interactor', 'Interactor_id', 'Interactor_UniProt_AC',
-                                                         'String_score', 'escore', 'dscore', 
-                                                         'tscore'])
+                                                         'String_score', 'Experimental_score', 'Database_score', 
+                                                         'Textmining_score'])
 
     print(f"Results saved to {output_file}")
 
