@@ -1,4 +1,4 @@
-Target_protein,Target_id,Target_Uniprot_AC,Interactor,Interactor_id,Interactor_UniProt_AC,String_score,escore,dscore,tscore
+Target_protein,Target_id,Target_Uniprot_AC,Interactor,Interactor_id,Interactor_UniProt_AC,String_score,Experimental_score,Database_score,Textmining_score
 RAD51B,9606.ENSP00000419881,O15315,RAD51C,9606.ENSP00000336701,O43502,0.999,0.57,0.9,0.981
 RAD51B,9606.ENSP00000419881,O15315,XRCC2,9606.ENSP00000352271,O43543,0.999,0.657,0.9,0.983
 RAD51B,9606.ENSP00000419881,O15315,RAD51D,9606.ENSP00000466399,O75771,0.999,0.573,0.9,0.986
