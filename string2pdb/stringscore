@@ -23,76 +23,23 @@ from io import StringIO
 import re
 import os
 
-def gene2uniprot(genename):
+def string2uniprot(stringid, alias_df):
     """
-    Function: Gets all primary UniProt accessions for a given gene name,
-    prioritizing entries where the parameter genename is the primary one.
-    If no primary match is found, retrieve the primary accession of entries where the gene name is a synonym.
-    
+    Function: Gets all primary UniProt accessions for a given STRING identifier from the 
+    preprocessed STRING human protein alias file.
     Parameter:
-        genename (str): Gene name to query.
-        
+    stringid (str): STRING id to query.   
     Returns:
         list: A list of primary UniProt accessions or 'None' if none found.
     """
-    url = "https://rest.uniprot.org/uniprotkb/search"
-    params = {
-        "query": f"gene:{genename} AND organism_id:9606 AND reviewed:true",
-        "format": "json",
-    }
-
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print(f"Error: Unable to fetch UniProt data for gene {genename} ({e})")
-        exit(1)
-
-    data = response.json()
-    results = data.get("results", [])
-
-
-    #Initialize accessions:
-    primary_accessions = []
-    fallback_accessions = []
-
-    # Get gene information for every result:
-    for entry in results:
-        genes_info = entry.get("genes", [])
-
-        is_primary = False
-        for gene in genes_info:
-            primary_gene = gene.get("geneName", {}).get("value", "")
-            synonyms = [syn.get("value", "") for syn in gene.get("synonyms", [])]
-
-            # Check if the parameter gene matches primary name:
-            if primary_gene == genename:
-                is_primary = True
-
-                # Save the accession and move on to next entry:
-                primary_accessions.append(entry["primaryAccession"])
-                break
-
-        # If not primary, add to fallback list:
-        # Example where this was needed: Interactor P13385 of target P36896.
-        if not is_primary:
-            fallback_accessions.append(entry["primaryAccession"])
-
-    # Return primary matches if found, otherwise return fallback matches:
-    if primary_accessions:
-        return primary_accessions
-    elif fallback_accessions:
-        print(f"Warning: No primary match found for {genename}. Returning fallback entries.")
-        # Example where this was needed: Interactor P13385 of target P36896.
-        return fallback_accessions
-    else:
-        # Example where this was needed: For the target P55211, the interactor with gene name: DIABLO-2
-        # I do not know how to handle cases like this. Both DIABLO and DIABLO-2 are present in STRING database, but
-        # the latter is not present in uniprot, so it cannot be mapped. Mentha does not return homologs that are not in Uniprot
-        # So I thought that it would be okay to remove these cases from the results.
-        print(f"Warning: No UniProt accessions found for gene {genename}, so it will be excluded from the results")
+    # Filter rows where the STRING ID matches the input string ID:
+    matches = alias_df[alias_df['string_protein_id'] == stringid]
+    
+    if matches.empty:
         return None
 
+    # Return all primary UniProt ACs as a list:
+    return matches['primary_uniprot_ac'].tolist()
 
 
 def main():
@@ -105,11 +52,10 @@ def main():
         help="HUGO Gene name to retrieve interactors for."
     )
     parser.add_argument(
-    "aliases_file_path", 
-    type=str,
-    nargs="?",
-    default="/data/databases/STRING/9606.protein.aliases.v12.0.txt",
-    help="Path to the aliases file. Default:/data/databases/STRING/9606.protein.aliases.v12.0.txt"
+        "--aliases_file_path", 
+        type=str,
+        default="/data/databases/STRING/STRING_primary_upac.csv",
+        help="Path to the pre-processed alias file containing STRING ID and UniProt mappings."
     )
     parser.add_argument(
         "-t", 
@@ -117,6 +63,13 @@ def main():
         type=float,
         default=0.7,
         help="Minimum STRING confidence score for interaction filtering (default: 0.7)."
+    )
+    parser.add_argument(
+        "-dt", 
+        "--dthreshold",
+        type=float,
+        default=0,
+        help="Minimum database score for interaction filtering (default: 0). Default value returns interactions associated in at least 1 of the curated databases. Use -1 to include all scores."
     )
     parser.add_argument(
         "-n",
@@ -128,6 +81,14 @@ def main():
     )
 
     args = parser.parse_args()
+
+
+    # Load alias file into DataFrame:
+    try:
+        alias_df = pd.read_csv(args.aliases_file_path)
+    except Exception as e:
+        print(f"Error: Unable to read alias file {args.aliases_file_path} ({e})")
+        exit(1)
 
     
     base_url = "https://string-db.org/api/tsv/get_string_ids"
@@ -149,7 +110,7 @@ def main():
     data = pd.read_csv(StringIO(string_response.text), sep='\t')
 
     # Convert each String_Id to UniProt AC and store in a new column:
-    data['UniProt_AC'] = data['preferredName'].apply(gene2uniprot)
+    data['UniProt_AC'] = data['stringId'].apply(lambda x: string2uniprot(x, alias_df))
 
     # Explode the DataFrame for rows where UniProt_AC has multiple values:
     data = data.explode('UniProt_AC')
@@ -198,30 +159,24 @@ def main():
 
     # Filter interactors with both score >= threshold and dscore > 0:
     # With database score > 0: No retrieval of unreviewed interactors
-    filtered_interactors = interactors_df[(interactors_df['score'] >= args.threshold) & (interactors_df['dscore'] > 0)].copy()
+    filtered_interactors = interactors_df[(interactors_df['score'] >= args.threshold) & (interactors_df['dscore'] > args.dthreshold)].copy()
 
-    # Assign new columns:
-    Interactor_UniProt_AC = []
-    for name in filtered_interactors["preferredName_B"]:
-        Interactor_UniProt_AC.append(gene2uniprot(name))
+    # Assign interactor's Uniprot_AC column:
+    filtered_interactors["Interactor_UniProt_AC"] = filtered_interactors["stringId_B"].apply(
+    lambda x: string2uniprot(x, alias_df))
 
-    # Add the Uniprot AC column:
-    filtered_interactors["Interactor_UniProt_AC"] = Interactor_UniProt_AC
-
-    # Remove rows where no UniProt accession was found for the genename: 
+    # Remove rows where no UniProt accession was found for the StringID: 
     filtered_interactors = filtered_interactors[filtered_interactors["Interactor_UniProt_AC"].notnull()]
 
     # Explode rows for multiple primary accessions:
     filtered_interactors = filtered_interactors.explode("Interactor_UniProt_AC")
 
+    # Add target's Uniprot_AC column:
     filtered_interactors['Target_Uniprot_AC'] = args.identifier
 
     if filtered_interactors.empty:
         print(f"No interactors found with score >= {args.threshold}.")
         exit(0)
-
-    # Explode DataFrame for UniProt AC entries if multiple reviewed IDs found:
-    filtered_interactors = filtered_interactors.explode('Interactor_UniProt_AC')
 
     # Extract columns:
     interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'Target_Uniprot_AC', 'preferredName_B', 'stringId_B', 'Interactor_UniProt_AC',

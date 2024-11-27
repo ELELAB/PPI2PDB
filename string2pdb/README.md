@@ -1,10 +1,15 @@
 # Description:
-This script extracts filtered interactors for a specified target from the STRING database, using the STRING API. 
-It provides the combined score of the confidence of each interaction (**String score**), along with 
-the three components of the physical network interaction score: **Experimental score**, **Database score** and **Text mining score**. 
-**Database score** > 0 threshold is being used to retrieve only reviewed interactors. 
-The **String Score** threshold is adjustable, allowing the user to specify the desired confidence level for extracted interactions. 
-The script also maps the interactors' gene names to their corresponding  primary UniProt ACs using the Uniprot API.
+- This script extracts filtered interactors for a specified target from the STRING database, using the **STRING API**. 
+- It searches only in the **physical** subnetwork of STRING by default, but can be adjusted to parse the entire database (functional network).
+- It provides the combined score of the confidence of each interaction (**String score**), along with 
+the three components of the physical network interaction score: 
+   - **Experimental score**
+   - **Database score**
+   - **Text mining score**. 
+- The **String Score** threshold is adjustable, allowing the user to specify the desired confidence level for extracted interactions. 
+- The **Database Score** can be adjusted as well, to specify the desired level of association in curated databases.
+- The script also maps the STRING identifier of the retrieved interactors to their **primary UniProt ACs**, using the preprocessed 
+STRING human protein alias file (https://stringdb-downloads.org/download/protein.aliases.v12.0/9606.protein.aliases.v12.0.txt.gz).
 
 # Requirements:
 Ensure you have the following installed:
@@ -16,7 +21,7 @@ Ensure you have the following installed:
 # Arguments:
 1. `<identifier>` (required, string): Uniprot Accession Code of the target protein.
 
-2. `<threshold>` (optional, float): String_score threshold. Default for MAVISp: **String_score > 0.7** AND **Database_score** > 0 .
+2. `<threshold>` (optional, float): String_score threshold. Default for MAVISp: **String_score > 0.7**.
    To adjust the String_score threshold, specify with `-t <threshold>`.
 
    **Other recommended thresholds for customized searches along with the confidence of interaction:**
@@ -28,10 +33,18 @@ Ensure you have the following installed:
    | High       | 0.7       |
    | Highest    | 0.9       |
 
-3. `<network>` (optional, string): 
+3. `<dthreshold>` (optional, float): Database_score threshold. Default for MAVISp: **Database_score > 0**.
+   - To adjust the Database_score threshold, specify with `-dt <dthreshold>`. To include all values, specify `-dt -1`.
+   - Default value returns interactions for which there is association in at least one of the curated databases that STRING interacts with. 
+
+4. `<network>` (optional, string): Network of the STRING database to be parsed.
    - Default for MAVISp: `'physical'` (Only interactors that are likely to bind to/form complexes with the target).
    - Choices: `'physical'` (subnetwork) or `'functional'` (entire network of the database).
    - To use the functional network, specify: `-n functional`.
+
+5. `<aliases_file_path>`(optional, string): Path to the pre-processed alias file containing STRING ID and UniProt AC mappings.
+   - default (for run on bioinfo servers): "/data/databases/STRING/STRING_primary_upac.csv"
+   - To use an alternative csv with columns 'string_protein_id' and 'primary_uniprot_ac' present, specify: `--aliases_file_path /custom/path/to/file.csv`
 
 # How to run:
 1. Activate the Python environment:
@@ -40,7 +53,7 @@ Ensure you have the following installed:
    ```
 2. Run the script:
    ```bash
-   ./stringscore <identifier> [-t <threshold>] [-n <network>]
+   ./stringscore <identifier> [-t <threshold>] [-dt <dthreshold>] [-n <network>] [--aliases_file_path </custom/path/to/file.csv>]
    ```
 ## Example for MAVISp run:
 ### Run the bash script run.sh in `example/` folder as bash run.sh it will perform: <br />
