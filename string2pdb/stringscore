@@ -158,7 +158,6 @@ def main():
     interactors_df = pd.read_csv(StringIO(interactors_response.text), sep='\t')
 
     # Filter interactors with both score >= threshold and dscore > 0:
-    # With database score > 0: No retrieval of unreviewed interactors
     filtered_interactors = interactors_df[(interactors_df['score'] >= args.threshold) & (interactors_df['dscore'] > args.dthreshold)].copy()
 
     # Assign interactor's Uniprot_AC column:
