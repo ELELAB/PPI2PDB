@@ -21,9 +21,7 @@ import pandas as pd
 import argparse
 
 parser = argparse.ArgumentParser(description="Processing of STRING human protein alias file.")
-parser.add_argument(
-    "--alias_file",
-    required=True,
+parser.add_argument("alias_file",
     help="Path to the STRING alias file (e.g., 9606.protein.aliases.v12.0.txt)--a tab-delimited file that maps STRING protein IDs to aliases like UniProt accession codes.",
 )
 
