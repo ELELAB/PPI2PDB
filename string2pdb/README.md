@@ -62,12 +62,12 @@ Ensure that the following are installed:
    - Default value returns interactions for which there is association in at least one of the curated databases that STRING interacts with. 
 
 4. `<network>` (optional, string): Network of the STRING database to be parsed.
-   - Default for MAVISp: `'physical'` (Only interactors that are likely to bind to/form complexes with the target).
-   - Choices: `'physical'` (subnetwork) or `'functional'` (entire network of the database).
+   - Default for MAVISp: `physical` (Only interactors that are likely to bind to/form complexes with the target).
+   - Choices: `physical` (subnetwork) or `functional` (entire network of the database).
    - To use the functional network, specify: `-n functional`.
 
 5. `<aliases_file_path>`(optional, string): Path to the pre-processed alias file containing STRING ID and UniProt AC mappings.
-   - default (for run on bioinfo servers): "/data/databases/STRING/STRING_primary_upac.csv"
+   - use the default on the bioinfo servers
    - To use an alternative csv with columns 'string_protein_id' and 'primary_uniprot_ac' present, specify: `--aliases_file_path /custom/path/to/file.csv`
 
 # How to run:
