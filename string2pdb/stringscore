@@ -24,13 +24,13 @@ import re
 import os
 
 def string2uniprot(stringid, alias_df):
-    """
-    Function: Gets all primary UniProt accessions for a given STRING identifier from the 
+    """ 
+    Gets all primary UniProt accessions for a given STRING identifier from the 
     preprocessed STRING human protein alias file.
     Parameter:
-    stringid (str): STRING id to query.   
+        stringid (str): STRING id to query.   
     Returns:
-        list: A list of primary UniProt accessions or 'None' if none found.
+        list of primary UniProt accessions or 'None' if none found.
     """
     # Filter rows where the STRING ID matches the input string ID:
     matches = alias_df[alias_df['string_protein_id'] == stringid]
@@ -40,6 +40,172 @@ def string2uniprot(stringid, alias_df):
 
     # Return all primary UniProt ACs as a list:
     return matches['primary_uniprot_ac'].tolist()
+
+
+def query_pdb(protein_identifier):
+    """
+    Queries PDB for entries based on UniProt Accession Code (AC) and human taxonomy ID (9606).
+    Parameter: 
+        protein_identifier (str): Uniprot AC to query.
+    Returns:
+        list of PDB entries or 'None' if none found.
+    """
+    url = "https://search.rcsb.org/rcsbsearch/v2/query"
+
+    # Construct payload to use UniProt AC and human taxonomy filter
+    payload = {
+        "query": {
+            "type": "group",
+            "logical_operator": "and",
+            "nodes": [
+                {
+                    "type": "group",
+                    "logical_operator": "and",
+                    "nodes": [
+                        {
+                            "type": "terminal",
+                            "service": "text",
+                            "parameters": {
+                                "attribute": "rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession",
+                                "operator": "in",
+                                "negation": False,
+                                "value": [protein_identifier] 
+                            }
+                        },
+                        {
+                            "type": "terminal",
+                            "service": "text",
+                            "parameters": {
+                                "attribute": "rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_name",
+                                "operator": "exact_match",
+                                "value": "UniProt",
+                                "negation": False
+                            }
+                        }
+                    ],
+                    "label": "nested-attribute"
+                },
+                {
+                    "type": "terminal",
+                    "service": "text",
+                    "parameters": {
+                        "attribute": "rcsb_entity_source_organism.taxonomy_lineage.id",
+                        "operator": "exact_match",
+                        "negation": False,
+                        "value": "9606"
+                    }
+                }
+            ],
+            "label": "text"
+        },
+        "return_type": "entry",
+        "request_options": {
+            "paginate": {
+                "start": 0,
+                "rows": 10000
+            },
+            "results_content_type": [
+                "experimental"
+            ],
+            "sort": [
+                {
+                    "sort_by": "score",
+                    "direction": "desc"
+                }
+            ],
+            "scoring_strategy": "combined"
+        }
+    }
+
+    headers = {'Content-Type': 'application/json'}
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        
+        # Retrieve results and check if entries are found
+        results = response.json().get("result_set", [])
+        if not results:
+            print(f"No PDB entries found for UniProt AC {protein_identifier}.")
+            return None
+        else:
+            return results  # Return results for further processing
+        
+    except requests.exceptions.RequestException as e:
+        print(f"Error querying PDB for UniProt AC {protein_identifier}: {e}")
+        return None
+
+
+def find_common_pdbs(target_entries, interactor_name):
+    """
+    Finds common PDB entries between target and interactor.
+    Parameters:
+        1. target_entries (list): PDB entries of the target's Uniprot AC
+        2. interactor_name (str): Uniprot AC of interactor
+    Returns:
+        set of common PDB IDS or 'None' if none is found.
+    """
+    interactor_pdbs = query_pdb(interactor_name)
+
+    if not interactor_pdbs:  # Check if no PDB entries were found
+        print(f"No PDB entries found for interactor: {interactor_name}.")
+        return None  
+
+    # Find common PDB IDs
+    target_ids = set(entry['identifier'] for entry in target_entries)
+    interactor_ids = set(entry['identifier'] for entry in interactor_pdbs)
+
+    common_ids = target_ids & interactor_ids
+    
+    if common_ids:
+        return common_ids  # set of common PDBs
+    else:
+        return None
+
+
+def get_experiment_details(common_pdb_ids):
+    """
+    Retrieves experiment details (method and resolution) for the given PDB IDs using the RCSB PDB API.
+    Parameter:
+        PDB ID (str)
+    Returns:
+        Dict with experiment details.
+    """
+    experiment_details = []
+    
+    for pdb in common_pdb_ids:
+        pdb = pdb.strip()
+        url = f'https://data.rcsb.org/rest/v1/core/entry/{pdb}'
+        
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data for PDB ID {pdb}: {e}")
+            exit(1)
+
+        # Get experimental method:
+        experimental_method = data.get('exptl', [{}])[0].get('method', None)
+        if experimental_method in ['NA', None]:  
+            experimental_method = None
+            
+        # Get resolution:
+        resolution = data.get('rcsb_entry_info', {}).get('resolution_combined', [None])[0]
+        if resolution in ['NA', None]:
+            resolution = None
+        else:
+            resolution = str(resolution)  
+
+        # Append to experiment_details:
+        experiment_details.append({
+            'PDB_ID': pdb,
+            'Experiment_Type': experimental_method,
+            'Resolution': resolution
+        })
+
+    return experiment_details
+
 
 
 def main():
@@ -175,19 +341,87 @@ def main():
 
     if filtered_interactors.empty:
         print(f"No interactors found with score >= {args.threshold}.")
+        # Create an empty csv in this case instead of exiting. Mentha2PDB and Pdbminer_complexes also create empty csv when no data is found. 
+        # This way the aggregation of all outputs and the addition of the aggregation script to the snakefile will be easier.
+
+        empty_df= pd.DataFrame(columns = ['Target_protein','Target_Uniprot_AC', 'StringID_Target','Interactor', 'Interactor_UniProt_AC', 'StringID_Interactor',
+                  'String_score', 'Experimental_score', 'Database_score', 'Textmining_score', 'PDB_ID', 'Experiment_Type', 'Resolution'])
+        
+        output_file = f"{args.identifier}_string_interactors.csv"
+        empty_df.to_csv(output_file, index=False)
+        
+        print(f"Results saved to {output_file}")
         exit(0)
 
     # Extract columns:
     interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'Target_Uniprot_AC', 'preferredName_B', 'stringId_B', 'Interactor_UniProt_AC',
                                         'score', 'escore', 'dscore', 'tscore']]
 
-    # Output CSV file:
-    output_file = f"{args.identifier}_string_interactors.csv"
-    interactors.to_csv(output_file, index=False, header=['Target_protein', 'Target_id', 'Target_Uniprot_AC', 'Interactor', 'Interactor_id', 'Interactor_UniProt_AC',
-                                                         'String_score', 'Experimental_score', 'Database_score', 
-                                                         'Textmining_score'])
 
-    print(f"Results saved to {output_file}")
+    # Query PDB for the target protein:
+    target_entries = query_pdb(args.identifier)
+
+    if not target_entries:
+        print(f"Warning: No PDB entries found for target {args.identifier}. Proceeding without PDB mapping.")
+
+        interactors['PDB_ID'] = None
+        interactors['Experiment_Type'] = None
+        interactors['Resolution'] = None
+                
+        # Output CSV file:
+        output_file = f"{args.identifier}_string_interactors.csv"
+        interactors.to_csv(output_file, index=False, header=['Target_protein','Target_Uniprot_AC', 'StringID_Target', 'Interactor', 'Interactor_UniProt_AC', 'StringID_Interactor',
+                                                         'String_score', 'Experimental_score', 'Database_score', 
+                                                         'Textmining_score', 'PDB_ID','Experiment_Type','Resolution'])
+        print(f"Results saved to {output_file}")
+
+    else:
+        # Add PDB details to interactors:
+        pdb_columns = []
+        for _, interactor_row in interactors.iterrows():
+            interactor_name = interactor_row['Interactor_UniProt_AC']
+            common_pdb_ids = find_common_pdbs(target_entries, interactor_name)
+
+            if common_pdb_ids:
+                pdb_details = get_experiment_details(common_pdb_ids)
+                for pdb_info_detail in pdb_details:
+                    pdb_columns.append({
+                        'Target_protein': interactor_row['preferredName_A'],
+                        'Target_Uniprot_AC': interactor_row['Target_Uniprot_AC'],
+                        'StringID_Target': interactor_row['stringId_A'],
+                        'Interactor': interactor_row['preferredName_B'],
+                        'Interactor_UniProt_AC': interactor_row['Interactor_UniProt_AC'],
+                        'StringID_Interactor': interactor_row['stringId_B'],
+                        'String_score': interactor_row['score'],
+                        'Experimental_score': interactor_row['escore'],
+                        'Database_score': interactor_row['dscore'],
+                        'Textmining_score': interactor_row['tscore'],
+                        'PDB_ID': pdb_info_detail['PDB_ID'],
+                        'Experiment_Type': pdb_info_detail['Experiment_Type'],
+                        'Resolution': pdb_info_detail['Resolution']
+                    })
+            else:
+                pdb_columns.append({
+                    'Target_protein': interactor_row['preferredName_A'],
+                    'Target_Uniprot_AC': interactor_row['Target_Uniprot_AC'],
+                    'StringID_Target': interactor_row['stringId_A'],
+                    'Interactor': interactor_row['preferredName_B'],
+                    'Interactor_UniProt_AC': interactor_row['Interactor_UniProt_AC'],
+                    'StringID_Interactor': interactor_row['stringId_B'],
+                    'String_score': interactor_row['score'],
+                    'Experimental_score': interactor_row['escore'],
+                    'Database_score': interactor_row['dscore'],
+                    'Textmining_score': interactor_row['tscore'],
+                    'PDB_ID': None,
+                    'Experiment_Type': None,
+                    'Resolution': None
+                })
+
+        output_file = f"{args.identifier}_string_interactors.csv"
+        pd.DataFrame(pdb_columns).to_csv(output_file, index=False)
+        
+        print(f"Results saved to {output_file}")
+
 
 if __name__ == "__main__":
-    main()
+    main() 
