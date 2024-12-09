@@ -20,6 +20,27 @@ import requests
 import argparse
 import pandas as pd
 from io import StringIO
+import re
+import os
+
+def string2uniprot(stringid, alias_df):
+    """
+    Function: Gets all primary UniProt accessions for a given STRING identifier from the 
+    preprocessed STRING human protein alias file.
+    Parameter:
+    stringid (str): STRING id to query.   
+    Returns:
+        list: A list of primary UniProt accessions or 'None' if none found.
+    """
+    # Filter rows where the STRING ID matches the input string ID:
+    matches = alias_df[alias_df['string_protein_id'] == stringid]
+    
+    if matches.empty:
+        return None
+
+    # Return all primary UniProt ACs as a list:
+    return matches['primary_uniprot_ac'].tolist()
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -31,11 +52,24 @@ def main():
         help="HUGO Gene name to retrieve interactors for."
     )
     parser.add_argument(
+        "--aliases_file_path", 
+        type=str,
+        default="/data/databases/STRING/STRING_primary_upac.csv",
+        help="Path to the pre-processed alias file containing STRING ID and UniProt mappings."
+    )
+    parser.add_argument(
         "-t", 
         "--threshold",
         type=float,
         default=0.7,
         help="Minimum STRING confidence score for interaction filtering (default: 0.7)."
+    )
+    parser.add_argument(
+        "-dt", 
+        "--dthreshold",
+        type=float,
+        default=0,
+        help="Minimum database score for interaction filtering (default: 0). Default value returns interactions associated in at least 1 of the curated databases. Use -1 to include all scores."
     )
     parser.add_argument(
         "-n",
@@ -47,6 +81,15 @@ def main():
     )
 
     args = parser.parse_args()
+
+
+    # Load alias file into DataFrame:
+    try:
+        alias_df = pd.read_csv(args.aliases_file_path)
+    except Exception as e:
+        print(f"Error: Unable to read alias file {args.aliases_file_path} ({e})")
+        exit(1)
+
     
     base_url = "https://string-db.org/api/tsv/get_string_ids"
     params = {
@@ -55,6 +98,7 @@ def main():
         'limit': 0,  
         'caller_identity': "MAVISp_web_app"     
     }
+
     try:
         string_response = requests.get(base_url, params=params)
         string_response.raise_for_status()
@@ -65,17 +109,31 @@ def main():
     # Read tsv data into pandas dataframe:
     data = pd.read_csv(StringIO(string_response.text), sep='\t')
 
-    # Check if identifier is in data:
-    if args.identifier not in data['preferredName'].values:
+    # Convert each String_Id to UniProt AC and store in a new column:
+    data['UniProt_AC'] = data['stringId'].apply(lambda x: string2uniprot(x, alias_df))
+
+    # Explode the DataFrame for rows where UniProt_AC has multiple values:
+    data = data.explode('UniProt_AC')
+
+    # Check if identifier is in the converted UniProt_AC column:
+    if args.identifier not in data['UniProt_AC'].values:
         print(f"Error: No STRING identifier found for {args.identifier} in the results.")
         exit(1)
 
-    # Handle case of multiple STRING IDs found:
-    if data.shape[0] > 1:
-        print(f"Warning: Multiple STRING IDs found for {args.identifier}. Selecting STRING ID based on preferred name.")
-        matching_row = data[data['preferredName'] == args.identifier]
+    # Initialize matching_row to None:
+    matching_row = None 
+
+    # Check for multiple rows with different STRING IDs:
+    unique_string_ids = data['stringId'].nunique()
+
+    if unique_string_ids > 1:
+        print(f"Warning: Multiple STRING IDs found for {args.identifier}. Proceeding with the String ID whose UniProt AC matches the input identifier:{args.identifier}.")
+        # Select the row where UniProt_AC matches args.identifier
+        matching_row = data[data['UniProt_AC'] == args.identifier]
         string_id = matching_row.iloc[0]['stringId']
+            
     else:
+        # Only one unique STRING ID, proceed with it:
         string_id = data.iloc[0]['stringId']
 
     # Get interactors from STRING API
@@ -99,20 +157,33 @@ def main():
     # Read tsv data into pandas dataframe:
     interactors_df = pd.read_csv(StringIO(interactors_response.text), sep='\t')
 
-    # Filter interactors:
-    filtered_interactors = interactors_df[interactors_df['score'] >= args.threshold]
+    # Filter interactors with both score >= threshold and dscore > 0:
+    filtered_interactors = interactors_df[(interactors_df['score'] >= args.threshold) & (interactors_df['dscore'] > args.dthreshold)].copy()
+
+    # Assign interactor's Uniprot_AC column:
+    filtered_interactors["Interactor_UniProt_AC"] = filtered_interactors["stringId_B"].apply(
+    lambda x: string2uniprot(x, alias_df))
+
+    # Remove rows where no UniProt accession was found for the StringID: 
+    filtered_interactors = filtered_interactors[filtered_interactors["Interactor_UniProt_AC"].notnull()]
+
+    # Explode rows for multiple primary accessions:
+    filtered_interactors = filtered_interactors.explode("Interactor_UniProt_AC")
+
+    # Add target's Uniprot_AC column:
+    filtered_interactors['Target_Uniprot_AC'] = args.identifier
 
     if filtered_interactors.empty:
         print(f"No interactors found with score >= {args.threshold}.")
         exit(0)
 
     # Extract columns:
-    interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'preferredName_B', 'stringId_B', 
+    interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'Target_Uniprot_AC', 'preferredName_B', 'stringId_B', 'Interactor_UniProt_AC',
                                         'score', 'escore', 'dscore', 'tscore']]
 
     # Output CSV file:
     output_file = f"{args.identifier}_string_interactors.csv"
-    interactors.to_csv(output_file, index=False, header=['Target_protein', 'Target_id', 'Interactor', 'Interactor_id', 
+    interactors.to_csv(output_file, index=False, header=['Target_protein', 'Target_id', 'Target_Uniprot_AC', 'Interactor', 'Interactor_id', 'Interactor_UniProt_AC',
                                                          'String_score', 'Experimental_score', 'Database_score', 
                                                          'Textmining_score'])
 
