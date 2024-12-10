@@ -25,8 +25,7 @@ import os
 
 def string2uniprot(stringid, alias_df):
     """ 
-    Gets all primary UniProt accessions for a given STRING identifier from the 
-    preprocessed STRING human protein alias file.
+    Gets all primary UniProt accessions for a given STRING identifier from the preprocessed STRING human protein alias file.
     Parameter:
         stringid (str): STRING id to query.   
     Returns:
@@ -122,18 +121,18 @@ def query_pdb(protein_identifier):
     try:
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()
-        
-        # Retrieve results and check if entries are found
-        results = response.json().get("result_set", [])
-        if not results:
-            print(f"No PDB entries found for UniProt AC {protein_identifier}.")
-            return None
-        else:
-            return results  # Return results for further processing
-        
     except requests.exceptions.RequestException as e:
         print(f"Error querying PDB for UniProt AC {protein_identifier}: {e}")
         return None
+
+    # Check if the response is empty:
+    if not response.text.strip():
+        print(f"Empty response for UniProt AC {protein_identifier}: No PDB entries found")
+        return None
+
+    # Get results:
+    results = response.json().get("result_set", [])
+    return results  
 
 
 def find_common_pdbs(target_entries, interactor_name):
@@ -341,9 +340,7 @@ def main():
 
     if filtered_interactors.empty:
         print(f"No interactors found with score >= {args.threshold}.")
-        # Create an empty csv in this case instead of exiting. Mentha2PDB and Pdbminer_complexes also create empty csv when no data is found. 
-        # This way the aggregation of all outputs and the addition of the aggregation script to the snakefile will be easier.
-
+        # Create an empty csv:
         empty_df= pd.DataFrame(columns = ['Target_protein','Target_Uniprot_AC', 'StringID_Target','Interactor', 'Interactor_UniProt_AC', 'StringID_Interactor',
                   'String_score', 'Experimental_score', 'Database_score', 'Textmining_score', 'PDB_ID', 'Experiment_Type', 'Resolution'])
         
@@ -376,52 +373,43 @@ def main():
         print(f"Results saved to {output_file}")
 
     else:
-        # Add PDB details to interactors:
         pdb_columns = []
         for _, interactor_row in interactors.iterrows():
-            interactor_name = interactor_row['Interactor_UniProt_AC']
-            common_pdb_ids = find_common_pdbs(target_entries, interactor_name)
+            this_interactor = {
+                'Target_protein': interactor_row['preferredName_A'],
+                'Target_Uniprot_AC': interactor_row['Target_Uniprot_AC'],
+                'StringID_Target': interactor_row['stringId_A'],
+                'Interactor': interactor_row['preferredName_B'],
+                'Interactor_UniProt_AC': interactor_row['Interactor_UniProt_AC'],
+                'StringID_Interactor': interactor_row['stringId_B'],
+                'String_score': interactor_row['score'],
+                'Experimental_score': interactor_row['escore'],
+                'Database_score': interactor_row['dscore'],
+                'Textmining_score': interactor_row['tscore']
+            }
+
+            common_pdb_ids = find_common_pdbs(target_entries, interactor_row['Interactor_UniProt_AC'])
 
             if common_pdb_ids:
                 pdb_details = get_experiment_details(common_pdb_ids)
                 for pdb_info_detail in pdb_details:
-                    pdb_columns.append({
-                        'Target_protein': interactor_row['preferredName_A'],
-                        'Target_Uniprot_AC': interactor_row['Target_Uniprot_AC'],
-                        'StringID_Target': interactor_row['stringId_A'],
-                        'Interactor': interactor_row['preferredName_B'],
-                        'Interactor_UniProt_AC': interactor_row['Interactor_UniProt_AC'],
-                        'StringID_Interactor': interactor_row['stringId_B'],
-                        'String_score': interactor_row['score'],
-                        'Experimental_score': interactor_row['escore'],
-                        'Database_score': interactor_row['dscore'],
-                        'Textmining_score': interactor_row['tscore'],
-                        'PDB_ID': pdb_info_detail['PDB_ID'],
-                        'Experiment_Type': pdb_info_detail['Experiment_Type'],
-                        'Resolution': pdb_info_detail['Resolution']
-                    })
+                    this_pdb = this_interactor.copy()
+                    this_pdb['PDB_ID'] = pdb_info_detail['PDB_ID']
+                    this_pdb['Experiment_Type'] = pdb_info_detail['Experiment_Type']
+                    this_pdb['Resolution'] = pdb_info_detail['Resolution']
+                    pdb_columns.append(this_pdb)
             else:
-                pdb_columns.append({
-                    'Target_protein': interactor_row['preferredName_A'],
-                    'Target_Uniprot_AC': interactor_row['Target_Uniprot_AC'],
-                    'StringID_Target': interactor_row['stringId_A'],
-                    'Interactor': interactor_row['preferredName_B'],
-                    'Interactor_UniProt_AC': interactor_row['Interactor_UniProt_AC'],
-                    'StringID_Interactor': interactor_row['stringId_B'],
-                    'String_score': interactor_row['score'],
-                    'Experimental_score': interactor_row['escore'],
-                    'Database_score': interactor_row['dscore'],
-                    'Textmining_score': interactor_row['tscore'],
-                    'PDB_ID': None,
-                    'Experiment_Type': None,
-                    'Resolution': None
-                })
+                this_interactor['PDB_ID'] = None
+                this_interactor['Experiment_Type'] = None
+                this_interactor['Resolution'] = None
+                pdb_columns.append(this_interactor)
 
+        # Save the results to CSV file:
         output_file = f"{args.identifier}_string_interactors.csv"
         pd.DataFrame(pdb_columns).to_csv(output_file, index=False)
-        
+
         print(f"Results saved to {output_file}")
 
-
 if __name__ == "__main__":
-    main()
+        main()
+
