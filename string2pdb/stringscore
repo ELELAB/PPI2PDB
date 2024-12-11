@@ -365,6 +365,12 @@ def main():
         interactors['Experiment_Type'] = None
         interactors['Resolution'] = None
                 
+        # Sort the DataFrame: 
+        interactors = interactors.sort_values(
+            by=['String_score','Interactor_UniProt_AC'],  
+            ascending=[False, True]  
+        )
+
         # Output CSV file:
         output_file = f"{args.identifier}_string_interactors.csv"
         interactors.to_csv(output_file, index=False, header=['Target_protein','Target_Uniprot_AC', 'StringID_Target', 'Interactor', 'Interactor_UniProt_AC', 'StringID_Interactor',
@@ -407,6 +413,17 @@ def main():
         # Save the results to CSV file:
         output_file = f"{args.identifier}_string_interactors.csv"
         pd.DataFrame(pdb_columns).to_csv(output_file, index=False)
+
+        # Save the results to CSV file:
+        output_file = f"{args.identifier}_string_interactors.csv"
+
+        # Sort the DataFrame: descending by String_score, then alphabetically by Interactor_UniProt_AC and PDB_ID:
+        sorted_df = pd.DataFrame(pdb_columns).sort_values(
+            by=['String_score', 'Interactor_UniProt_AC', 'PDB_ID'], 
+            ascending=[False, True, True] 
+        )
+
+        sorted_df.to_csv(output_file, index=False)
 
         print(f"Results saved to {output_file}")
 
