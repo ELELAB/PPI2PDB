@@ -5,8 +5,6 @@
 - The output includes confidence scores of interaction along with available structures from the Protein Data Bank (PDB) or the Beltrao’s dataset.
 - The interactors are ranked based on the Mentha confidence score whereas STRING confidence score is the secondary ranking criterion.
 
-
-
 ## **Requirements**
 ### **Software:**
 - Python 3.x 
