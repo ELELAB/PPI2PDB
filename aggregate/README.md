@@ -31,7 +31,7 @@
 
 2. **Execute the Script**:
    ```bash
-   ./aggregate.py -m <path_to_mentha_file> -s <path_to_string_file>
+   ./aggregate -m <path_to_mentha_file> -s <path_to_string_file>
    ```
 
    Replace `<path_to_mentha_file>` and `<path_to_string_file>` with the respective file paths to the Mentha and STRING outputs.
