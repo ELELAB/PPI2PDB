@@ -67,9 +67,9 @@ The -af argument allows the script to generate a local copy of the corresponding
 ## Examples of run:
 run the bash script do.sh in `example/` folder as `tsp -N 1 bash do.sh Q9GZQ8` it will perform:
 ```bash
-python ../ mentha2pdb.py -i 2024-03-04 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
+python ../mentha2pdb.py -i 2024-03-04 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
 ```
 run the bash script do.sh in `example2/` folder as `tsp -N 1 bash do.sh P54252` it will perform:
 ```bash
-python ../ mentha2pdb.py -i 2024-03-04 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
+python ../mentha2pdb.py -i 2024-03-04 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
 ```
