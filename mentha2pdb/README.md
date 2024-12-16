@@ -1,20 +1,27 @@
 # Mentha2PDB
 
-#References
+## References
 
 Arnaudi M, Beltrame L, Degn K, Utichi M, Pettenella A, Scrima S, et al. MAVISp: Multi-layered Assessment of VarIants by Structure for proteins. bioRxiv. 2022. https://doi.org/10.1101/2022.10.22.513328.
 
 contacts: matl-at-cancer.dk, elenap-at-cancer.dk, elpap-at-dtu.dk
 
-#Requirements
+## Requirements:
 
-python3 (on local server: use module load python/3.7/modulefile) <br />
-pypdb v2.2 (only version 2.2 works since it has been recently updated to support the RCSB Search API V2) <br />
-pandas <br />
+- python3 (on local server: use module load python/3.7/modulefile)
+- pypdb v2.2 (only version 2.2 works since it has been recently updated to support the RCSB Search API V2) 
+- pandas 
 
-#Usage
+## Usage:
 
-python mentha2pdb.py -i /data/databases/mentha-20220530/2022-05-30 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv <br />
+There are 2 options of usage:
+
+**1. Running directly the mentha2pdb.py script:** <br />
+ 	 - Possibility to run for multiple Uniprot accessions at the same time.
+### How to run:
+ ```bash
+python mentha2pdb.py -i /data/databases/mentha-20220530/2022-05-30 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv 
+ ```
 -i mentha database to analyze <br />
 -t input file with list of the uniprot IDs of the target proteins <br />
 -s threshold of mentha score for filtering (i.e., remove all the entries with mentha score below the threshold) <br />
@@ -41,13 +48,28 @@ Furthermore the -extra and the -af arguments can be used to annotate dimeric com
 The -ec argument can be used to set a different pDockQ cutoff than the default one to filter the models of the complexes. 
 The -af argument allows the script to generate a local copy of the corresponding files of the filtered models in the folder AF_Huri_HuMAP. 
 
+**2. Running mentha2pdb.py through the do.sh script:**
+- Recommended for runs within the MAVISp workflow on the **bioinfo servers** and can be run only for 1 Uniprot Accession code at a time. It includes the following arguments:
+	- `-ec = 0.2`
+	- `-s = 0.2`
+	- `-i 2024-03-04`
+	- `-t target_uniprot_ID.txt`
+	- `-p`
+	- `-a`
+	- `-extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv`
+	- `-af /data/databases/AF_Huri_HuMAP`
 
-#Example
-run the bash script run.sh in example folder as bash run.sh it will perform <br />
-python ../mentha2pdb.py -i /data/databases/mentha-20230417/2023-04-17 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -a <br />
+### How to run do.sh:
+ ```bash
+    tsp -N 1 bash do.sh <Uniprot_AC>
+ ```
 
-run the bash script run.sh in example2 folder as bash run.sh it will perform <br />
-python ../mentha2pdb.py -i /data/databases/mentha-20230417/2023-04-17 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -a -c config.ini -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP -ec 0 <br />
-
-run the bash script run.sh in example3 folder as bash run.sh it will perform <br />
-python ../mentha2pdb.py -i /data/databases/mentha-20230417/2023-04-17 -t target_uniprot_ID.txt -s 0.2 -o Q9GZQ8.csv -p -a -c config.ini -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP/ -ec 0.2 <br />
+## Examples of run:
+run the bash script do.sh in `example/` folder as `tsp -N 1 bash do.sh Q9GZQ8` it will perform:
+```bash
+python ../ mentha2pdb.py -i 2024-03-04 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
+```
+run the bash script do.sh in `example2/` folder as `tsp -N 1 bash do.sh P54252` it will perform:
+```bash
+python ../ mentha2pdb.py -i 2024-03-04 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
+```
