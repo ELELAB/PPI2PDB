@@ -34,6 +34,11 @@ def main():
         required=True,
         help="Path to the string2pdb output csv file.")
 
+    parser.add_argument(
+        "-o",
+        help="Specify the output filename. If not provided, a default name will be used based on Target_Uniprot_AC."
+    )
+
     args = parser.parse_args()
 
     # Load mentha2pdb output:
@@ -76,8 +81,9 @@ def main():
 
     # Add "AF_Huri_HuMAP" to "Structure" if HuMap or HuRI values are not "":
     mentha_df["Structure"] = mentha_df.apply(
-        lambda row: ",".join(filter(None, [row["Structure"], "AF_Huri_HuMAP"])) \
-        if row["pDockQ HuMap"] != "" or row["pDockQ HuRI"] != "" else row["Structure"],
+        lambda row: ";".join(filter(None, [row["Structure"], "AF_Huri_HuMAP"])) \
+            if row["pDockQ HuMap"] != "" or row["pDockQ HuRI"] != "" 
+            else row["Structure"],
         axis=1
     )
 
@@ -91,7 +97,7 @@ def main():
         "Interactor_UniProt_AC", 
         "Interactor", 
         "Mentha_score"
-    ], as_index=False).agg({"Structure": lambda x: ",".join(sorted(set(filter(None, x))))})
+    ], as_index=False).agg({"Structure": lambda x: ";".join(sorted(set(filter(None, x))))})
 
     mentha_df.sort_values(by="Mentha_score", ascending=False, inplace=True)
 
@@ -117,14 +123,14 @@ def main():
         "Interactor_UniProt_AC", 
         "String_score"
     ], as_index=False).agg({
-    "PDB_ID": lambda x: ",".join(sorted(set(map(str, filter(None, x)))))
+    "PDB_ID": lambda x: ";".join(sorted(set(map(str, filter(None, x)))))
     })
 
     string_df.sort_values(by="String_score", ascending=False, inplace=True)
 
     if mentha_df.empty and string_df.empty:
 
-        print(f"Warning:No results found in Mentha and STRING for the query protein")
+        print(f"Warning: No results found in Mentha and STRING for the query protein")
     
     if not string_df.empty and not mentha_df.empty:
 
@@ -145,8 +151,9 @@ def main():
 
     # Update Structure column:
     merged_df["Structure"] = merged_df.apply(
-        lambda row: ",".join(filter(None, sorted(set(row["Structure"].split(",") + row["PDB_ID"].split(",")))))
-        if pd.notna(row["PDB_ID"]) else row["Structure"],
+        lambda row: ";".join(filter(None, sorted(set(row["Structure"].split(";") + row["PDB_ID"].split(";")))))
+            if pd.notna(row["PDB_ID"]) 
+            else row["Structure"],
         axis=1
     )
 
@@ -181,7 +188,12 @@ def main():
         "Other_resources"
     ]]
 
-    filename = f"{final_df['Target_Uniprot_AC'].iloc[0]}_aggregated.csv"
+    # Use user-specified filename or create default:
+    if args.o:
+        filename = args.o
+    else:
+        filename = f"{final_df['Target_Uniprot_AC'].iloc[0]}_aggregated.csv"
+
     final_df.to_csv(filename, index=False, na_rep="")
     print("Aggregation complete. Saved as", filename,".")
 
