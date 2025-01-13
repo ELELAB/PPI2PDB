@@ -12,8 +12,9 @@
   - `pandas`
 
 ### **Files:**
-- A Mentha2PDB (`/data/user/shared_projects/mavisp/mavisp_templates_2024/GENE_NAME/interactome/mentha2pdb/mentha2pdb.py`) output CSV.
-- A STRING2PDB (`/data/user/shared_projects/mavisp/mavisp_templates_2024/GENE_NAME/interactome/string2pdb/string2pdb`) output CSV.
+#### For the same target protein: ####
+- A Mentha2PDB (`mentha2pdb.py`) output CSV
+- A STRING2PDB (`string2pdb`) output CSV
 
 
 ## **Arguments**
@@ -40,7 +41,7 @@
 ## **Example of run**
 Run the bash script in the folder `example/` with `bash run.sh`. It will perform:
    ```bash
-    ./aggregate -m /data/user/shared_projects/mavisp/RAD51B/interactome/mentha2pdb/O15315.csv -s /data/user/elenikia/PPI2PDB/string2pdb/example/O15315_string_interactors.csv
+    ./aggregate -m O15315.csv -s O15315_string_interactors.csv
    ```
 
 ---
