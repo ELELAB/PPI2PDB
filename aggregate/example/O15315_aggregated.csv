@@ -1,4 +1,4 @@
-target uniprot id,target uniprot gene,interactor uniprot id,interactor uniprot gene,mentha score,string score,structure,other resources
+Target_Uniprot_AC,Target_protein,Interactor_UniProt_AC,Interactor,Mentha_score,String_score,Structure,Other_resources
 O15315,RAD51B,O43502,RAD51C,0.787,0.999,"8FAZ,8GBJ,8OUY,8OUZ",
 O15315,RAD51B,P07305,H1F0,0.523,,,
 O15315,RAD51B,Q6NVH7,SWSAP1,0.454,,,

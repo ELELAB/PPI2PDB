@@ -1,2 +1,2 @@
 module load python/3.10/modulefile
-./../aggregate -m /data/user/shared_projects/mavisp/RAD51B/interactome/mentha2pdb/O15315.csv -s /data/user/elenikia/PPI2PDB/string2pdb/example/O15315_string_interactors.csv
+./../aggregate -m O15315.csv -s O15315_string_interactors.csv
