@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+
+# AGGREGATE
+# Copyright (C) 2024  Eleni Kiachaki and Matteo Tiberti, Cancer Structural Biology, Danish Cancer Institute
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+import argparse
+import pandas as pd
+import re
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Aggregate results from mentha2pdb, string2pdb, pdbminer, and pdbminer_complexes.")
+
+    parser.add_argument(
+        "-m", 
+        required=True,
+        help="Path to the mentha2pdb output csv file.")
+
+    parser.add_argument(
+        "-s",
+        required=True,
+        help="Path to the string2pdb output csv file.")
+
+    parser.add_argument(
+        "-o",
+        help="Specify the output filename. If not provided, a default name will be used based on Target_Uniprot_AC."
+    )
+
+    args = parser.parse_args()
+
+    # Load mentha2pdb output:
+    mentha_df = pd.read_csv(args.m)
+
+    # Load string2pdb output:
+    string_df = pd.read_csv(args.s)
+
+    ## MENTHA2PDB OUTPUT PRE-PROCESSING: ##
+    
+    # Replace 'na' values with "":
+    mentha_df.replace('na', "", inplace=True)
+
+    # Keep only the required columns
+    mentha_df = mentha_df[[
+        "target uniprot id", 
+        "target uniprot gene", 
+        "interactor uniprot id", 
+        "interactor uniprot gene", 
+        "mentha score", 
+        "PDB id", 
+        "pDockQ HuMap", 
+        "pDockQ HuRI"
+    ]]
+
+    mentha_df.rename(columns={
+        "target uniprot gene": "Target_protein",
+        "target uniprot id": "Target_Uniprot_AC",
+        "interactor uniprot gene": "Interactor",
+        "interactor uniprot id": "Interactor_UniProt_AC",
+        "mentha score": "Mentha_score"
+    }, inplace=True)
+
+    # Simplify gene names by keeping only the part before the first space or '{' :
+    mentha_df["Target_protein"] = mentha_df["Target_protein"].str.replace(r"[ {].*", "", regex=True)
+    mentha_df["Interactor"] = mentha_df["Interactor"].str.replace(r"[ {].*", "", regex=True)
+
+    # Initialize the "Structure" column with the PDB id values:
+    mentha_df["Structure"] = mentha_df["PDB id"].fillna("")
+
+    # Add "AF_Huri_HuMAP" to "Structure" if HuMap or HuRI values are not "":
+    mentha_df["Structure"] = mentha_df.apply(
+        lambda row: ";".join(filter(None, [row["Structure"], "AF_Huri_HuMAP"])) \
+            if row["pDockQ HuMap"] != "" or row["pDockQ HuRI"] != "" 
+            else row["Structure"],
+        axis=1
+    )
+
+    # Drop columns "PDB id", "pDockQ HuMap", and "pDockQ HuRI":
+    mentha_df.drop(columns=["PDB id", "pDockQ HuMap", "pDockQ HuRI"], inplace=True)
+
+    # Group by all columns except "Structure" and aggregate "Structure" as comma-separated strings
+    mentha_df = mentha_df.groupby([
+        "Target_Uniprot_AC", 
+        "Target_protein", 
+        "Interactor_UniProt_AC", 
+        "Interactor", 
+        "Mentha_score"
+    ], as_index=False).agg({"Structure": lambda x: ";".join(sorted(set(filter(None, x))))})
+
+    mentha_df.sort_values(by="Mentha_score", ascending=False, inplace=True)
+
+    ## STRING2PDB OUTPUT PRE-PROCESSING: ##
+
+    string_df.fillna("", inplace=True)
+
+    # Keep only required columns from string_df:
+    string_df = string_df[[
+        "Target_protein", 
+        "Target_Uniprot_AC", 
+        "Interactor", 
+        "Interactor_UniProt_AC", 
+        "String_score", 
+        "PDB_ID"
+    ]]
+
+    # Group by relevant columns and aggregate PDB_IDs:
+    string_df = string_df.groupby([
+        "Target_protein", 
+        "Target_Uniprot_AC", 
+        "Interactor", 
+        "Interactor_UniProt_AC", 
+        "String_score"
+    ], as_index=False).agg({
+    "PDB_ID": lambda x: ";".join(sorted(set(map(str, filter(None, x)))))
+    })
+
+    string_df.sort_values(by="String_score", ascending=False, inplace=True)
+
+    if mentha_df.empty and string_df.empty:
+
+        print(f"Warning: No results found in Mentha and STRING for the query protein")
+    
+    if not string_df.empty and not mentha_df.empty:
+
+        mentha_target_ac = mentha_df["Target_Uniprot_AC"].iloc[0]
+        string_target_ac = string_df["Target_Uniprot_AC"].iloc[0]
+        if mentha_target_ac != string_target_ac:
+            print(f"Error: Target Uniprot ACs do not match between Mentha and STRING outputs.")
+            exit(1)
+
+    ## MERGING ##
+    # Merge mentha_df and string_df:
+    merged_df = pd.merge(
+        mentha_df, 
+        string_df[["Interactor_UniProt_AC", "String_score", "PDB_ID"]], 
+        on="Interactor_UniProt_AC", 
+        how="left"
+    )
+
+    # Update Structure column:
+    merged_df["Structure"] = merged_df.apply(
+        lambda row: ";".join(filter(None, sorted(set(row["Structure"].split(";") + row["PDB_ID"].split(";")))))
+            if pd.notna(row["PDB_ID"]) 
+            else row["Structure"],
+        axis=1
+    )
+
+    # Drop unnecessary columns:
+    merged_df.drop(columns=[ "PDB_ID"], inplace=True)
+
+    merged_df.sort_values(by=["Mentha_score", "String_score"], ascending=[False, False], inplace=True)
+
+    # Find string entries not in mentha:
+    unmatched_string_df = string_df[~string_df["Interactor_UniProt_AC"].isin(mentha_df["Interactor_UniProt_AC"])]
+    unmatched_string_df = unmatched_string_df.rename(columns={"PDB_ID": "Structure"})
+    unmatched_string_df["Mentha_score"] = None
+    unmatched_string_df = unmatched_string_df[[
+        "Target_Uniprot_AC", "Target_protein", "Interactor_UniProt_AC", 
+        "Interactor", "Mentha_score", "String_score", "Structure"
+    ]]
+
+    # Concatenate the unmatched string entries to df:
+    final_df = pd.concat([merged_df, unmatched_string_df], ignore_index=True)
+
+    # Add other resources column (where we will report pdbminer/pdbminer_complexes):
+    final_df["Other_resources"] = ""
+
+    final_df = final_df[[
+        "Target_Uniprot_AC", 
+        "Target_protein", 
+        "Interactor_UniProt_AC", 
+        "Interactor", 
+        "Mentha_score", 
+        "String_score", 
+        "Structure", 
+        "Other_resources"
+    ]]
+
+    # Use user-specified filename or create default:
+    if args.o:
+        filename = args.o
+    else:
+        filename = f"{final_df['Target_Uniprot_AC'].iloc[0]}_aggregated.csv"
+
+    final_df.to_csv(filename, index=False, na_rep="")
+    print("Aggregation complete. Saved as", filename,".")
+
+if __name__ == "__main__":
+    main()
