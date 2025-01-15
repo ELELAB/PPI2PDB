@@ -33,6 +33,15 @@ def main():
         "-s",
         required=True,
         help="Path to the string2pdb output csv file.")
+    parser.add_argument(
+        "-pc",
+        required=True,
+        help="Path to the pdbminer_complexes output csv file.")
+
+    parser.add_argument(
+        "-p",
+        required=True,
+        help="Path to the pdbminer output csv file.")
 
     parser.add_argument(
         "-o",
@@ -41,11 +50,12 @@ def main():
 
     args = parser.parse_args()
 
-    # Load mentha2pdb output:
+    # Load input files:
     mentha_df = pd.read_csv(args.m)
-
-    # Load string2pdb output:
     string_df = pd.read_csv(args.s)
+    pdbminer_c_df = pd.read_csv(args.pc)
+    pdbminer_df = pd.read_csv(args.p)
+
 
     ## MENTHA2PDB OUTPUT PRE-PROCESSING: ##
     
@@ -188,6 +198,91 @@ def main():
         "Other_resources"
     ]]
 
+    # Parse pdbminer complexes output:
+    for index, row in pdbminer_c_df.iterrows():
+        structure_id = row["structure_id"]
+        complex_details = row["complex_details"]
+
+        # Remove asterisks from structure IDs:
+        normalized_structures = final_df["Structure"].apply(lambda x: ";".join(s.replace("*", "").replace("**", "") for s in x.split(";")))
+
+        # Check if any structure_id is not in final_df:
+        if not any(structure_id in existing_structure.split(";") for existing_structure in normalized_structures):
+            split_details = re.split(r"[,\s;]+", complex_details)
+
+            #Retrieve the upacs of that structure:
+            uniprot_ids = [part for part in split_details if re.match(r"[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z0-9]{3,5})", part)]
+
+            for uniprot_id in uniprot_ids:
+                # exclude the target protein:
+                if uniprot_id != final_df['Target_Uniprot_AC'].iloc[0]:
+                    
+                    # Check if interactor is already in final_df:
+                    matching_row = final_df[final_df["Interactor_UniProt_AC"] == uniprot_id]
+                    
+                    if not matching_row.empty:
+                        # Append the new structure and report "pdbminer complexes" in resources col:
+                        final_df.loc[matching_row.index, "Structure"] = (
+                        final_df.loc[matching_row.index, "Structure"]
+                        .apply(lambda x: ";".join(filter(None, set(x.split(";") + [f"{structure_id}**"]))))
+                        )
+                        final_df.loc[matching_row.index, "Other_resources"] = (
+                        final_df.loc[matching_row.index, "Other_resources"]
+                        .apply(lambda x: "; ".join(filter(None, sorted(set(x.split("; ") + ["pdbminer complexes**"])))))
+                        )
+                    else:
+                        # Create new row for tne new interactor:
+                        new_row = {
+                            "Target_Uniprot_AC": final_df["Target_Uniprot_AC"].iloc[0],
+                            "Target_protein": final_df["Target_protein"].iloc[0],
+                            "Interactor_UniProt_AC": uniprot_id,
+                            "Structure": f"{structure_id}**",
+                            "Other_resources": "pdbminer complexes**"
+                        }
+
+                        final_df = pd.concat([final_df, pd.DataFrame([new_row])], ignore_index=True)
+
+    # Parse pdbminer output:
+    for structure_id, complex_details, complex_type in zip(
+        pdbminer_df["structure_id"], 
+        pdbminer_df["complex_protein_details"], 
+        pdbminer_df["complex_protein"]
+    ):
+        if complex_type == "protein complex":
+            normalized_structures = final_df["Structure"].apply(lambda x: ";".join(s.replace("*", "").replace("**", "") for s in x.split(";")))
+
+            # Check if structure_id is already in final_df:
+            if not any(structure_id in existing_structure.split(";") for existing_structure in normalized_structures):            
+                split_details = re.split(r"[,\s;]+", complex_details)
+                uniprot_ids = [part for part in split_details if re.match(r"[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z0-9]{3,5})", part)]
+
+                for uniprot_id in uniprot_ids:
+                    if uniprot_id != final_df['Target_Uniprot_AC'].iloc[0]:
+                        
+                        # Check if interactor is already in final_df:
+                        matching_row = final_df[final_df["Interactor_UniProt_AC"] == uniprot_id]
+                    
+                        if not matching_row.empty:
+                            final_df.loc[matching_row.index, "Structure"] = (
+                            final_df.loc[matching_row.index, "Structure"]
+                            .apply(lambda x: ",".join(filter(None, set(x.split(";") + [f"{structure_id}*"]))))
+                            )
+                            final_df.loc[matching_row.index, "Other_resources"] = (
+                            final_df.loc[matching_row.index, "Other_resources"]
+                            .apply(lambda x: "; ".join(filter(None, sorted(set(x.split("; ") + ["pdbminer*"])))))
+                            )
+                        else:
+                            new_row = {
+                                "Target_Uniprot_AC": final_df["Target_Uniprot_AC"].iloc[0],
+                                "Target_protein": final_df["Target_protein"].iloc[0],
+                                "Interactor_UniProt_AC": uniprot_id,
+                                "Structure": f"{structure_id}*",
+                                "Other_resources": "pdbminer*"
+                            }
+
+                            final_df = pd.concat([final_df, pd.DataFrame([new_row])], ignore_index=True)
+
+    
     # Use user-specified filename or create default:
     if args.o:
         filename = args.o
