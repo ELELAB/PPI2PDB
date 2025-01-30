@@ -78,7 +78,7 @@ def process_pdbminer_data(data, final_df, target_column, interactor_column, stru
 
             if existing_row.empty:
                 # Add a new row for unmatched interactors:
-                target_protein = final_df["Target_protein"].iloc[0] if not final_df.empty else "Unknown"
+                target_protein = final_df["Target_protein"].iloc[0]
                 final_df = pd.concat([
                     final_df,
                     pd.DataFrame([{
@@ -98,8 +98,9 @@ def process_pdbminer_data(data, final_df, target_column, interactor_column, stru
                 idx = existing_row.index[0]
                 current_structures = final_df.at[idx, structure_column] or ""
                 final_df.at[idx, structure_column] = ";".join(
-                    filter(None, set(current_structures.split(";") + [structure_id]))
-                )     
+                    sorted(set(filter(None, current_structures.split(";") + [structure_id])))
+                )
+     
 
     return final_df
 
