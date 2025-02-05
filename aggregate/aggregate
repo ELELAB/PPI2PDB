@@ -196,8 +196,8 @@ def main():
     mentha_df.sort_values(by="Mentha_score", ascending=False, inplace=True)
 
     ## STRING2PDB OUTPUT PRE-PROCESSING: ##
-
-    string_df.fillna("", inplace=True)
+    
+    string_df = string_df.apply(lambda col: col.fillna("") if col.dtype == "object" else col.fillna(0))
 
     # Keep only required columns from string_df:
     string_df = string_df[[
@@ -259,7 +259,8 @@ def main():
     # Find string entries not in mentha:
     unmatched_string_df = string_df[~string_df["Interactor_UniProt_AC"].isin(mentha_df["Interactor_UniProt_AC"])]
     unmatched_string_df = unmatched_string_df.rename(columns={"PDB_ID": "PPI_Structure"})
-    unmatched_string_df["Mentha_score"] = None
+    unmatched_string_df["Mentha_score"] = None 
+    unmatched_string_df["Mentha_score"] = unmatched_string_df["Mentha_score"].astype("float64")  
     unmatched_string_df = unmatched_string_df[[
         "Target_Uniprot_AC", "Target_protein", "Interactor_UniProt_AC", 
         "Interactor", "Mentha_score", "String_score", "PPI_Structure"
