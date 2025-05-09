@@ -367,7 +367,7 @@ def main():
                 
         # Sort the DataFrame: 
         interactors = interactors.sort_values(
-            by=['String_score','Interactor_UniProt_AC'],  
+            by=['score','Interactor_UniProt_AC'],  
             ascending=[False, True]  
         )
 
