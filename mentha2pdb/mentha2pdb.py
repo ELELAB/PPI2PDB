@@ -18,11 +18,77 @@ import time
 from decimal import Decimal
 import numpy as np
 import pandas as pd
-import pypdb
 import re
 import requests
 import warnings
 import csv
+
+
+def get_pdb_entries_for_uniprot(uniprot_id):
+    """
+    Queries PDB for entries based on UniProt Accession Code (AC) and human taxonomy ID (9606).
+    Returns list of PDB IDs, or [] if none found.
+    """
+    url = "https://search.rcsb.org/rcsbsearch/v2/query"
+    headers = {'Content-Type': 'application/json'}
+
+    payload = {
+        "query": {
+            "type": "group",
+            "logical_operator": "and",
+            "nodes": [
+                {
+                    "type": "group",
+                    "logical_operator": "and",
+                    "nodes": [
+                        {
+                            "type": "terminal",
+                            "service": "text",
+                            "parameters": {
+                                "attribute": "rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession",
+                                "operator": "in",
+                                "negation": False,
+                                "value": [uniprot_id]
+                            }
+                        },
+                        {
+                            "type": "terminal",
+                            "service": "text",
+                            "parameters": {
+                                "attribute": "rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_name",
+                                "operator": "exact_match",
+                                "value": "UniProt",
+                                "negation": False
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "terminal",
+                    "service": "text",
+                    "parameters": {
+                        "attribute": "rcsb_entity_source_organism.taxonomy_lineage.id",
+                        "operator": "exact_match",
+                        "negation": False,
+                        "value": "9606"
+                    }
+                }
+            ]
+        },
+        "return_type": "entry",
+        "request_options": {
+            "return_all_hits": True
+        }
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        result_data = response.json()
+        return [entry["identifier"] for entry in result_data.get("result_set", [])]
+    except requests.exceptions.RequestException as e:
+        print(f"Error querying PDB for UniProt ID {uniprot_id}: {e}")
+        return []
 
 
 def make_target_interactor_sequence_files(dataframe_out):
@@ -360,7 +426,7 @@ def normal_run(args):
 
             uniprotData = uniprotData.reset_index()  # make sure indexes pair with number of rows
 
-            targetQueryResult = pypdb.Query(uniprot).search(num_attempts=10, sleep_time=5)
+            targetQueryResult = get_pdb_entries_for_uniprot(uniprot)
             print('Target {}                                          '.format(uniprot))
             for index, row in uniprotData.iterrows():
                 targetProtein = ''
@@ -394,7 +460,7 @@ def normal_run(args):
                 outRow.extend([targetProtein, targetGene, interactorProtein, interactorGene, score])
 
                 # sending pypdb requests
-                interactorQueryResult = pypdb.Query(interactorProtein).search(num_attempts=10, sleep_time=5)
+                interactorQueryResult = get_pdb_entries_for_uniprot(interactorProtein)
 
                 # check if something went wrong in pypdb -> set na and go next
                 if interactorQueryResult is None or targetQueryResult is None:
