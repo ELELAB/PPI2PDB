@@ -9,7 +9,7 @@ contacts: matl-at-cancer.dk, elenap-at-cancer.dk, elpap-at-dtu.dk
 ## Requirements:
 
 - python3 (on local server: use module load python/3.7/modulefile)
-- pypdb v2.2 (only version 2.2 works since it has been recently updated to support the RCSB Search API V2) 
+- requests (used for querying the RCSB PDB Search API directly)
 - pandas 
 
 ## Usage:
