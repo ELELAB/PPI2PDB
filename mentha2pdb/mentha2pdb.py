@@ -399,7 +399,7 @@ def normal_run(args):
     dataframeOut = pd.DataFrame(columns=['target uniprot id', 'target uniprot gene',  # 2 -> from csv
                                          'interactor uniprot id', 'interactor uniprot gene',  # 2 -> from csv
                                          'mentha score',  # 1 -> from csv
-                                         'PDB id',  # 1 -> from pypdb lib
+                                         'PDB id',  # 1 -> from RCSB API
                                          'fusion',  # 1 -> from summary request
                                          'target chain id', 'target starting residue', 'target ending residue',
                                          # 3 -> from mappings request
@@ -459,14 +459,14 @@ def normal_run(args):
                 # setup first 5 of outRow
                 outRow.extend([targetProtein, targetGene, interactorProtein, interactorGene, score])
 
-                # sending pypdb requests
+                # sending RCSB API requests
                 interactorQueryResult = get_pdb_entries_for_uniprot(interactorProtein)
 
-                # check if something went wrong in pypdb -> set na and go next
-                if interactorQueryResult is None or targetQueryResult is None:
+                # check if something went wrong in RCSB API -> set na and go next
+                if not interactorQueryResult or not targetQueryResult:
                     # set output row to na (13 cause we had 5 set and 13 missing positions)
                     outRow.extend(['na'] * 13)
-                    print('\t PYPDB nonetype returned {}                 '.format(interactorProtein), end='\r')
+                    print(f'\t No PDB entries found via RCSB API for interactor {interactorProtein}         ', end='\r')
                     # append row to dataframe Out
                     dataframeOut.loc[len(dataframeOut)] = outRow
                 else:
@@ -607,7 +607,7 @@ def cfg_run(args):
     dataframeOut = pd.DataFrame(columns=['target uniprot id', 'target uniprot gene',  # 2 -> from csv
                                          'interactor uniprot id', 'interactor uniprot gene',  # 2 -> from csv
                                          'mentha score',  # 1 -> from csv
-                                         'PDB id',  # 1 -> from pypdb lib
+                                         'PDB id',  # 1 -> from RCSB API
                                          'fusion',  # 1 -> from summary request
                                          'target chain id', 'target starting residue', 'target ending residue',
                                          # 3 -> from mappings request
@@ -874,7 +874,7 @@ def process_extra_files(args, extra_files):
     extra_df = pd.DataFrame(columns=['target uniprot id', 'target uniprot gene',  # 2 -> from csv
                                          'interactor uniprot id', 'interactor uniprot gene',  # 2 -> from csv
                                          'mentha score',  # 1 -> from csv
-                                         'PDB id',  # 1 -> from pypdb lib
+                                         'PDB id',  # 1 -> from RCSB API
                                          'fusion',  # 1 -> from summary request
                                          'target chain id', 'target starting residue', 'target ending residue',
                                          # 3 -> from mappings request
@@ -1119,7 +1119,7 @@ def main(argv):
         dfxF.columns.values[-1] = new_last_column_name
         dfxF.columns.values[-2] = new_second_last_column_name
 
-        dfxF.sort_values(['target uniprot id', 'mentha score'], ascending=False, inplace=True)
+        dfxF.sort_values(['target uniprot id', 'mentha score', 'PDB id'], ascending=False, inplace=True)
         dfxF.replace(np.nan, 'na', inplace=True)
 
         csv_outname = args.o
