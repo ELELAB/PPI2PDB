@@ -1,72 +1,78 @@
 target uniprot id,target uniprot gene,interactor uniprot id,interactor uniprot gene,mentha score,PDB id,fusion,target chain id,target starting residue,target ending residue,interactor chain id,interactor starting residue,interactor ending residue,other interactors,method,resolution,dna chains,num ligands,PMID,pDockQ HuMap,pDockQ HuRI
-P54252,ATXN3,P0CG48,UBC,1,na,na,na,na,na,na,na,na,na,na,na,na,na,18599482 25527291 14559776 25231079 20865150 25144244 25448680 20622874 23625928 21118805 12857950 25988170 16196087 23314748 23659897 16118278 16040601 19153604 14602712 ,na,na
+P54252,ATXN3,P0CG48,UBC,1,2JRI,na,A,1,182,B;C,609;609,684;684,na,Solution NMR,na,0.0,0.0,18599482 25527291 14559776 25231079 20865150 25144244 25448680 20622874 23625928 21118805 12857950 25988170 16196087 23314748 23659897 16118278 16040601 19153604 14602712 ,na,na
 P54252,ATXN3,P55072,VCP,0.999,na,na,na,na,na,na,na,na,na,na,na,na,na,12944474 16822850 19843543 14749733 22970133 16525503 20414249 18199748 25231079 19175675 23383273 27851749 24100225 28275011 ,na,na
 P54252,ATXN3,O60260,PARK2,0.953,na,na,na,na,na,na,na,na,na,na,na,na,na,22081612 20940148 24063750 ,na,na
-P54252,ATXN3,P54252,ATXN3,0.943,na,na,na,na,na,na,na,na,na,na,na,na,na,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,4YS9,na,B,278,329,B,278,329,P0AEY0,X-ray diffraction,2,0.0,1.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,4WTH,na,A;B,278;278,329;329,A;B,278;278,329;329,P0AEX9,X-ray diffraction,2.25,0.0,1.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,2KLZ,na,A,222,263,A,222,263,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,2JRI,na,A,1,182,A,1,182,P0CG48,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,2DOS,na,A,1,171,A,1,171,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,2AGA,na,A,1,185,A,1,185,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
+P54252,ATXN3,P54252,ATXN3,0.943,1YZB,na,A,1,182,A,1,182,na,Solution NMR,na,0.0,0.0,22129356 21780213 16194547 16525503 ,na,na
 P54252,ATXN3,P54725,RAD23A,0.922,na,na,na,na,na,na,na,na,na,na,na,na,na,10915768 19013454 17935801 16712842 22970133 16713569 ,na,na
 P54252,ATXN3,Q9UNE7,STUB1,0.914,na,na,na,na,na,na,na,na,na,na,na,na,na,21855799 20943656 19153604 21625540 ,na,na
 P54252,ATXN3,P54727,RAD23B,0.82,na,na,na,na,na,na,na,na,na,na,na,na,na,10915768 16713569 16712842 19843543 ,na,na
 P54252,ATXN3,P49841,GSK3B,0.748,na,na,na,na,na,na,na,na,na,na,na,na,na,17434145 21900206 ,na,na
 P54252,ATXN3,P04637,TP53,0.74,na,na,na,na,na,na,na,na,na,na,na,na,na,27851749 ,na,na
-P54252,ATXN3,O15379,HDAC3,0.702,na,na,na,na,na,na,na,na,na,na,na,na,na,17079677 ,na,na
 P54252,ATXN3,O75376,NCOR1,0.702,na,na,na,na,na,na,na,na,na,na,na,na,na,17079677 ,na,na
+P54252,ATXN3,O15379,HDAC3,0.702,na,na,na,na,na,na,na,na,na,na,na,na,na,17079677 ,na,na
 P54252,ATXN3,Q15843,NEDD8,0.671,na,na,na,na,na,na,na,na,na,na,na,na,na,17935801 ,na,na
 P54252,ATXN3,Q14457,BECN1,0.636,na,na,na,na,na,na,na,na,na,na,na,na,na,28445460 ,na,na
 P54252,ATXN3,Q92793,CREBBP,0.569,na,na,na,na,na,na,na,na,na,na,na,na,na,12297501 17885668 ,na,na
-P54252,ATXN3,O95155,UBE4B,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,14749733 16525503 ,na,na
-P54252,ATXN3,P63165,SUMO1,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,15952105 28275011 ,na,na
 P54252,ATXN3,Q9BSU1,C16ORF70,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,16713569 ,na,na
+P54252,ATXN3,P63165,SUMO1,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,15952105 28275011 ,na,na
+P54252,ATXN3,O95155,UBE4B,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,14749733 16525503 ,na,na
 P54252,ATXN3,Q9UMX0,UBQLN1,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,17082820 ,na,na
 P54252,ATXN3,P67870,CSNK2B,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,18839019 ,na,na
 P54252,ATXN3,P98177,FOXO4,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,21536589 ,na,na
-P54252,ATXN3,Q09472,EP300,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,12297501 ,na,na
 P54252,ATXN3,Q13501,SQSTM1,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,25158237 ,na,na
+P54252,ATXN3,Q09472,EP300,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,12297501 ,na,na
 P54252,ATXN3,Q92831,KAT2B,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,12297501 ,na,na
 P54252,ATXN3,Q96T60,PNKP,0.396,na,na,na,na,na,na,na,na,na,na,na,na,na,25590633 ,na,na
 P54252,ATXN3,O60291,MGRN1,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,24769000 ,na,na
+P54252,ATXN3,Q96J02,ITCH,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,24865853 ,na,na
 P54252,ATXN3,P16220,CREB1,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,11572863 ,na,na
-P54252,ATXN3,P29590,PML,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,11572863 ,na,na
 P54252,ATXN3,Q07817,BCL2L1,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,23562578 ,na,na
+P54252,ATXN3,P29590,PML,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,11572863 ,na,na
 P54252,ATXN3,Q14676,MDC1,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,28275011 ,na,na
 P54252,ATXN3,Q14CB8,ARHGAP19,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,16713569 ,na,na
-P54252,ATXN3,Q96J02,ITCH,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,24865853 ,na,na
-P54252,ATXN3,P04183,TK1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-P54252,ATXN3,P20073,ANXA7,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-P54252,ATXN3,P38936,CDKN1A,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-P54252,ATXN3,P50570,DNM2,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-P54252,ATXN3,Q15418,RPS6KA1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-P54252,ATXN3,Q9BUB5,MKNK1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
 P54252,ATXN3,Q9NRD5,PICK1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,16713569 ,na,na
-P54252,ATXN3,P07437,TUBB,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24685680 ,na,na
+P54252,ATXN3,P20073,ANXA7,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,Q9BUB5,MKNK1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,P50570,DNM2,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,P38936,CDKN1A,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,P04183,TK1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,Q15418,RPS6KA1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+P54252,ATXN3,Q9UBN7,HDAC6,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24685680 ,na,na
+P54252,ATXN3,Q71U36,TUBA1A,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24685680 ,na,na
 P54252,ATXN3,P17655,CAPN2,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,27731380 ,na,na
+P54252,ATXN3,P07437,TUBB,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24685680 ,na,na
+P54252,ATXN3,P68036,UBE2L3,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,22081612 ,na,na
 P54252,ATXN3,P51665,PSMD7,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,12944474 ,na,na
 P54252,ATXN3,P52565,ARHGDIA,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,15952105 ,na,na
-P54252,ATXN3,P68036,UBE2L3,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,22081612 ,na,na
 P54252,ATXN3,P78348,ASIC1,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,15952105 ,na,na
 P54252,ATXN3,Q16763,UBE2S,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,20622874 ,na,na
-P54252,ATXN3,Q71U36,TUBA1A,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24685680 ,na,na
-P54252,ATXN3,Q9UBN7,HDAC6,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,24685680 ,na,na
-P54252,ATXN3,Q9UKV5,AMFR,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,19661182 ,na,na
 P54252,ATXN3,Q9Y4K3,TRAF6,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,20622874 ,na,na
+P54252,ATXN3,Q9UKV5,AMFR,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,19661182 ,na,na
 P54252,ATXN3,Q01844,EWSR1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,16713569 ,na,na
+P54252,ATXN3,Q8IYX4,DND1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,na,na
+P54252,ATXN3,Q6ZN18,AEBP2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,na,na
+P54252,ATXN3,Q6UXN7,TOMM20L,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,na,na
 P54252,ATXN3,O14925,TIMM23,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
 P54252,ATXN3,Q6PGN9,PSRC1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
-P54252,ATXN3,Q6UXN7,TOMM20L,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,na,na
-P54252,ATXN3,Q6ZN18,AEBP2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,na,na
-P54252,ATXN3,Q8IYX4,DND1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26186194 28514442 ,na,na
+P54252,ATXN3,Q96T23,RSF1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
 P54252,ATXN3,Q8N183,NDUFAF2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
 P54252,ATXN3,Q8WUZ0,BCL7C,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
-P54252,ATXN3,Q92995,USP13,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,19615732 ,na,na
 P54252,ATXN3,Q96DC9,OTUB2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,19615732 ,na,na
-P54252,ATXN3,Q96T23,RSF1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
-P54252,ATXN3,Q9H3F6,KCTD10,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,19615732 ,na,na
+P54252,ATXN3,Q92995,USP13,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,19615732 ,na,na
 P54252,ATXN3,Q9P1Y5,CAMSAP3,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
+P54252,ATXN3,Q9H3F6,KCTD10,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,19615732 ,na,na
 P54252,ATXN3,Q9ULM6,CNOT6,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
 P54252,ATXN3,Q9UM00,TMCO1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26496610 ,na,na
+P54252,ATXN3,P25686,DNAJB2,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,21625540 ,na,na
+P54252,ATXN3,Q9H040,SPRTN,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,23042605 ,na,na
 P54252,ATXN3,P07900,HSP90AA1,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,27851749 ,na,na
 P54252,ATXN3,P12956,XRCC6,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,17885668 ,na,na
-P54252,ATXN3,P25686,DNAJB2,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,21625540 ,na,na
 P54252,ATXN3,P54257,HAP1,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,21386698 ,na,na
 P54252,ATXN3,P62195,PSMC5,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,17302910 ,na,na
 P54252,ATXN3,Q86TM6,SYVN1,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,24068323 ,na,na
-P54252,ATXN3,Q9H040,SPRTN,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,23042605 ,na,na
