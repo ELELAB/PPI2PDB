@@ -226,15 +226,8 @@ def main():
         "-t", 
         "--threshold",
         type=float,
-        default=0.7,
-        help="Minimum STRING confidence score for interaction filtering (default: 0.7)."
-    )
-    parser.add_argument(
-        "-dt", 
-        "--dthreshold",
-        type=float,
-        default=0,
-        help="Minimum database score for interaction filtering (default: 0). Default value returns interactions associated in at least 1 of the curated databases. Use -1 to include all scores."
+        default=0.15,
+        help="Minimum STRING confidence score for interaction filtering (default: 0.15). Interactions must also be supported by either curated databases or experimental data."
     )
     parser.add_argument(
         "-n",
@@ -322,8 +315,11 @@ def main():
     # Read tsv data into pandas dataframe:
     interactors_df = pd.read_csv(StringIO(interactors_response.text), sep='\t')
 
-    # Filter interactors with both score >= threshold and dscore > 0:
-    filtered_interactors = interactors_df[(interactors_df['score'] >= args.threshold) & (interactors_df['dscore'] > args.dthreshold)].copy()
+    # Filter interactors with score >= threshold and (dscore > 0 OR escore > 0):
+    filtered_interactors = interactors_df[
+        (interactors_df['score'] >= args.threshold) &
+        ((interactors_df['dscore'] > 0) | (interactors_df['escore'] > 0))
+    ].copy()
 
     # Assign interactor's Uniprot_AC column:
     filtered_interactors["Interactor_UniProt_AC"] = filtered_interactors["stringId_B"].apply(
