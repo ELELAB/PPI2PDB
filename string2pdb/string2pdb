@@ -347,7 +347,7 @@ def main():
         exit(0)
 
     # Extract columns:
-    interactors = filtered_interactors[['preferredName_A', 'stringId_A', 'Target_Uniprot_AC', 'preferredName_B', 'stringId_B', 'Interactor_UniProt_AC',
+    interactors = filtered_interactors[['preferredName_A','Target_Uniprot_AC', 'stringId_A', 'preferredName_B', 'Interactor_UniProt_AC','stringId_B',
                                         'score', 'escore', 'dscore', 'tscore']]
 
 
