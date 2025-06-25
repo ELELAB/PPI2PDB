@@ -19,6 +19,7 @@
 import argparse
 import pandas as pd
 import re
+import os
 
 def process_pdbminer_data(data, final_df, target_column, interactor_column, structure_column, is_complexes=False):
     """
@@ -139,6 +140,11 @@ def main():
     string_df = pd.read_csv(args.s)
     pdbminer_c_df = pd.read_csv(args.c)
     pdbminer_df = pd.read_csv(args.p)
+
+
+    # Extract UPAC from mentha filename
+    upac_basename = os.path.basename(args.m)        
+    upac_id = os.path.splitext(upac_basename)[0]
 
 
     ## MENTHA2PDB OUTPUT PRE-PROCESSING: ##
@@ -308,7 +314,7 @@ def main():
     if args.o:
         filename = args.o
     else:
-        filename = f"{final_df['Target_Uniprot_AC'].iloc[0]}_aggregated.csv"
+        filename = f"{upac_id}_aggregated.csv"
 
     final_df.to_csv(filename, index=False, na_rep="")
     print("Aggregation complete. Saved as", filename,".")
