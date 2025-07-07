@@ -19,6 +19,7 @@
 import argparse
 import pandas as pd
 import re
+import os
 
 def process_pdbminer_data(data, final_df, target_column, interactor_column, structure_column, is_complexes=False):
     """
@@ -140,6 +141,9 @@ def main():
     pdbminer_c_df = pd.read_csv(args.c)
     pdbminer_df = pd.read_csv(args.p)
 
+    # Extract UPAC from mentha filename
+    upac_basename = os.path.basename(args.m)        
+    upac_id = os.path.splitext(upac_basename)[0]
 
     ## MENTHA2PDB OUTPUT PRE-PROCESSING: ##
     
@@ -174,12 +178,13 @@ def main():
     mentha_df["PPI_Structure"] = mentha_df["PDB id"].fillna("")
 
     # Add "AF_Huri_HuMAP" to "Structure" if HuMap or HuRI values are not "":
-    mentha_df["PPI_Structure"] = mentha_df.apply(
-        lambda row: ";".join(filter(None, [row["PPI_Structure"], "AF_Huri_HuMAP"])) \
-            if row["pDockQ HuMap"] != "" or row["pDockQ HuRI"] != "" 
-            else row["PPI_Structure"],
-        axis=1
-    )
+    if not mentha_df.empty:
+        mentha_df["PPI_Structure"] = mentha_df.apply(
+            lambda row: ";".join(filter(None, [row["PPI_Structure"], "AF_Huri_HuMAP"])) \
+                if row["pDockQ HuMap"] != "" or row["pDockQ HuRI"] != "" 
+                else row["PPI_Structure"],
+            axis=1
+        )
 
     # Drop columns "PDB id", "pDockQ HuMap", and "pDockQ HuRI":
     mentha_df.drop(columns=["PDB id", "pDockQ HuMap", "pDockQ HuRI"], inplace=True)
@@ -308,7 +313,7 @@ def main():
     if args.o:
         filename = args.o
     else:
-        filename = f"{final_df['Target_Uniprot_AC'].iloc[0]}_aggregated.csv"
+        filename = f"{upac_id}_aggregated.csv"
 
     final_df.to_csv(filename, index=False, na_rep="")
     print("Aggregation complete. Saved as", filename,".")
