@@ -178,12 +178,13 @@ def main():
     mentha_df["PPI_Structure"] = mentha_df["PDB id"].fillna("")
 
     # Add "AF_Huri_HuMAP" to "Structure" if HuMap or HuRI values are not "":
-    mentha_df["PPI_Structure"] = mentha_df.apply(
-        lambda row: ";".join(filter(None, [row["PPI_Structure"], "AF_Huri_HuMAP"])) \
-            if row["pDockQ HuMap"] != "" or row["pDockQ HuRI"] != "" 
-            else row["PPI_Structure"],
-        axis=1
-    )
+    if not mentha_df.empty:
+        mentha_df["PPI_Structure"] = mentha_df.apply(
+            lambda row: ";".join(filter(None, [row["PPI_Structure"], "AF_Huri_HuMAP"])) \
+                if row["pDockQ HuMap"] != "" or row["pDockQ HuRI"] != "" 
+                else row["PPI_Structure"],
+            axis=1
+        )
 
     # Drop columns "PDB id", "pDockQ HuMap", and "pDockQ HuRI":
     mentha_df.drop(columns=["PDB id", "pDockQ HuMap", "pDockQ HuRI"], inplace=True)
