@@ -83,8 +83,6 @@ def process_pdbminer_data(data, final_df, target_column, interactor_column, stru
                     continue 
                 interactors.append(uniprot_id)
 
-        print (interactors)
-
         for interactor in interactors:
             # Check if the target and interactor exist in final_df:
             existing_row = final_df[
@@ -312,7 +310,6 @@ def main():
         interactor_column="Interactor_UniProt_AC", 
         structure_column="PDBminer_complexes_structure", 
         is_complexes=True
-
     )
 
     ## PROCESS PDBMINER ##
@@ -323,7 +320,6 @@ def main():
         interactor_column="Interactor_UniProt_AC", 
         structure_column="PDBminer_structure", 
         is_complexes=False
-
     )
     
     # Use user-specified filename or create default:
