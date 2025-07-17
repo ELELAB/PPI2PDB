@@ -51,9 +51,22 @@ def process_pdbminer_data(data, final_df, target_column, interactor_column, stru
             self_chain = row.get('self_chains', "").strip()
             target_uniprot_id = complex_details.get(self_chain, "")
 
-            # Only the binding_partners have passed the pdbminer_complexes filtering:
-            binding_partners = row.get('binding_partners', "").split(" residues binding ")
-            chain_1, chain_2 = binding_partners[0].strip(), binding_partners[1].strip()
+            # Skip rows with no binding residues
+            residues = str(row.get('residues', '')).strip()
+            if residues in ['', '[]']:
+                continue
+
+            binding_partners = str(row.get('binding_partners') or "").strip()
+
+            # Check binding_partners format
+            if " residues binding " not in binding_partners:
+                continue
+
+            parts = binding_partners.split(" residues binding ")
+            if len(parts) != 2:
+                continue
+
+            chain_1, chain_2 = parts[0].strip(), parts[1].strip()
             if chain_1 == self_chain:
                 interactors.append(complex_details.get(chain_2, ""))
             else:
@@ -69,6 +82,8 @@ def process_pdbminer_data(data, final_df, target_column, interactor_column, stru
                 if uniprot_id == target_uniprot_id:
                     continue 
                 interactors.append(uniprot_id)
+
+        print (interactors)
 
         for interactor in interactors:
             # Check if the target and interactor exist in final_df:
@@ -297,6 +312,7 @@ def main():
         interactor_column="Interactor_UniProt_AC", 
         structure_column="PDBminer_complexes_structure", 
         is_complexes=True
+
     )
 
     ## PROCESS PDBMINER ##
@@ -307,6 +323,7 @@ def main():
         interactor_column="Interactor_UniProt_AC", 
         structure_column="PDBminer_structure", 
         is_complexes=False
+
     )
     
     # Use user-specified filename or create default:
