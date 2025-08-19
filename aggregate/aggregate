@@ -43,38 +43,37 @@ def process_pdbminer_data(data, final_df, target_column, interactor_column, stru
         interactors = []
 
         if is_complexes:
+            if row['complex_type'] != 'protein complex':
+                continue
+
             # Parsing pdbminer_complexes:
             complex_details = {
                 e.split(", ")[2].split('_')[1]: e.split(", ")[1]
-                for e in row.get('complex_details', "").split(";")
+                for e in row['complex_details'].split(";")
             }
-            self_chain = row.get('self_chains', "").strip()
-            target_uniprot_id = complex_details.get(self_chain, "")
-
             # Skip rows with no binding residues
             residues = str(row.get('residues', '')).strip()
             if residues in ['', '[]']:
                 continue
 
-            binding_partners = str(row.get('binding_partners') or "").strip()
-
-            # Check binding_partners format
-            if " residues binding " not in binding_partners:
+            m = re.match(r'^(\S+)\s+residues binding\s+(\S+)$', str(row['binding_partners']).strip())
+            if not m:
                 continue
+            chain_1, chain_2 = m.group(1), m.group(2)
 
-            parts = binding_partners.split(" residues binding ")
-            if len(parts) != 2:
-                continue
+            self_chains = [c.strip() for c in str(row['self_chains']).split(';') if c.strip()]
+            target_uniprot_id = next(complex_details[ch] for ch in self_chains if ch in complex_details)
+            for sc in self_chains:
+                if sc not in complex_details:
+                    complex_details[sc] = target_uniprot_id
+            if chain_1 in self_chains or chain_2 in self_chains:
+                partner_chain = chain_2 if chain_1 in self_chains else chain_1
+                interactors = [complex_details[partner_chain]]
 
-            chain_1, chain_2 = parts[0].strip(), parts[1].strip()
-            if chain_1 == self_chain:
-                interactors.append(complex_details.get(chain_2, ""))
-            else:
-                interactors.append(complex_details.get(chain_1, ""))
         else:
             # Parsing pdbminer:
             target_uniprot_id = row["uniprot_id"]
-            complex_details = row.get("complex_protein_details", "[]")
+            complex_details = row["complex_protein_details"]
             complex_details = complex_details.strip("[]").split(";")
             interactors = []
             for entry in complex_details:
@@ -82,6 +81,8 @@ def process_pdbminer_data(data, final_df, target_column, interactor_column, stru
                 if uniprot_id == target_uniprot_id:
                     continue 
                 interactors.append(uniprot_id)
+            if len(row['chains'].split(';')) > 1:
+                interactors.append(target_uniprot_id)
 
         for interactor in interactors:
             # Check if the target and interactor exist in final_df:
@@ -114,7 +115,7 @@ def process_pdbminer_data(data, final_df, target_column, interactor_column, stru
                 final_df.at[idx, structure_column] = ";".join(
                     sorted(set(filter(None, current_structures.split(";") + [structure_id])))
                 )
-     
+
 
     return final_df
 
