@@ -20,7 +20,7 @@ There are 2 modes of usage:
 Makes it possible to run for multiple Uniprot accessions at the same time. For example:
 
 ```bash
-python mentha2pdb.py -i /data/databases/mentha-20220530/2022-05-30 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv 
+python mentha2pdb.py -i /data/databases/mentha-20250428/2025-04-28 -t target_uniprot_ID.txt -s 0.2 -o out.csv -p -extra /data/databases/AF_Huri_HuMAP/summary/huri_upac.csv  /data/databases/AF_Huri_HuMAP/summary/humap_upac.csv 
  ```
 
 where
@@ -33,7 +33,7 @@ where
 -x generate a single csv output file per each target uniprot ID named dataframe_<target_uniprot_ID>.csv (this option overrides option -o) <br />
 -a have in output input files for AlphaFold_multimer <br />
 -c Config file containing manual annotations of PDBs or pair of partners not included in the mentha db to be annotated in the final output <br /> 
--extra AlphaFold2 dimeric complexes databases (HuRI.csv and humap.csv datasets) from Burke, D.F. et al.  Nat Struct Mol Biol 30, 216–225 (2023). https://doi.org/10.1038/s41594-022-00910-8  <br />
+-extra Preprocessed AlphaFold2 dimeric complexes databases (from HuRI.csv and humap.csv datasets) from Burke, D.F. et al.  Nat Struct Mol Biol 30, 216–225 (2023). https://doi.org/10.1038/s41594-022-00910-8. 'NameUPAC' column has been added during the preprocessing of the databases, that provides the interaction pair in UPAC format. <br />
 
 In case of incorrect or obsolete Uniprot ID or gene names annotations present in Mentha database, mentha2pdb write a log file reporting them, please check the log file carefully.
 The `-c` argument can be used to give `mentha2pdb` an input configuration .ini file with pairs of partners whose interaction is known in literature but that are not present in the mentha database. There are issues in the annotation of the experimental structure (i.e. PDB with fusion constructs) or unreleased experimental structures. The entries from the configuration file should be in the following format:
@@ -57,11 +57,11 @@ The -af argument allows the script to generate a local copy of the corresponding
 this is recommended for runs within the MAVISp workflow on the **bioinfo servers** and can be run only for 1 Uniprot Accession code at a time. It includes the following arguments:
 	- `-ec = 0.2`
 	- `-s = 0.2`
-	- `-i 2024-03-04`
+	- `-i 2025-04-28`
 	- `-t target_uniprot_ID.txt`
 	- `-p`
 	- `-a`
-	- `-extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv`
+	- `-extra /data/databases/AF_Huri_HuMAP/summary/huri_upac.csv  /data/databases/AF_Huri_HuMAP/summary/humap_upac.csv`
 	- `-af /data/databases/AF_Huri_HuMAP`
 
 ### How to run do.sh:
@@ -72,9 +72,9 @@ this is recommended for runs within the MAVISp workflow on the **bioinfo servers
 ## Examples of run:
 run the bash script do.sh in `example/` folder as `tsp -N 1 bash do.sh Q9GZQ8` it will perform:
 ```bash
-python ../mentha2pdb.py -i 2024-03-04 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
+python ../mentha2pdb.py -i 2025-04-28 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/huri_upac.csv  /data/databases/AF_Huri_HuMAP/summary/humap_upac.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
 ```
 run the bash script do.sh in `example2/` folder as `tsp -N 1 bash do.sh P54252` it will perform:
 ```bash
-python ../mentha2pdb.py -i 2024-03-04 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
+python ../mentha2pdb.py -i 2025-04-28 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/huri_upac.csv  /data/databases/AF_Huri_HuMAP/summary/humap_upac.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
 ```

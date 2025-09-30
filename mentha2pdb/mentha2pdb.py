@@ -758,19 +758,6 @@ def cfg_run(args):
 
     return datasets
 
-def convert_ensg(ensg_list):
-
-    print(f'Please wait ... ({len(ensg_list)} ensg codes are being converted)')
-    url = 'https://rest.uniprot.org/uniprotkb/search?query='
-    urls = []
-
-    urls = [url+ensg for ensg in ensg_list]
-
-    ensg_d = {}
-    ensg_d = download(urls, ensg_d)
-
-    return ensg_d
-
 def extract_genes(data, edf_list, target_list):
     ol = []
 
@@ -844,29 +831,17 @@ def copy_folder(ex, id1, id2, af_folder_path):
             f'source folder does not exist \n {from_path}'
         print(s)
 
-
-def rename_folders_based_on_uniprot(ensg_to_uniprot_dict, base_path='AF_Huri_HuMAP'):
-    #Rename folders from ENSG to UniProt IDs .
-
+def rename_pair_folder_direct(ensg1, ensg2, up1, up2, base_path='AF_Huri_HuMAP'):
     huri_path = Path(base_path, 'Huri_dimers')
     humap_path = Path(base_path, 'HuMAP_dimers')
 
     for sub_path in [huri_path, humap_path]:
-        if sub_path.exists():
-            for folder in sub_path.iterdir():
-                if folder.is_dir():
-                    parts = folder.name.split('-')
-                    if len(parts) == 2:
-                        ensg1, ensg2 = parts
-                        uniprot1 = ensg_to_uniprot_dict.get(ensg1)
-                        uniprot2 = ensg_to_uniprot_dict.get(ensg2)
-                        if uniprot1 and uniprot2:
-                            new_name = f"{uniprot1}-{uniprot2}"
-                            new_folder_path = folder.parent / new_name
-                            folder.rename(new_folder_path)
-                            print(f"Renamed {folder.name} to {new_name}")
-
-
+        old_folder = sub_path / f"{ensg1}-{ensg2}"
+        if old_folder.exists():
+            new_folder = sub_path / f"{up1}-{up2}"
+            if not new_folder.exists():
+                old_folder.rename(new_folder)
+                print(f"Renamed {old_folder} → {new_folder}")
 
 def process_extra_files(args, extra_files):
 
@@ -906,63 +881,57 @@ def process_extra_files(args, extra_files):
             extra_df[e] = []
 
         pairs_scores = []
-        ensgs = []
         for extra_file in extra_files:
+            filename = os.path.basename(extra_file).lower()
             pair_score=[]
             extra_file_data = pd.read_csv(extra_file, sep=',')
             #cut all scores under cutoff
             extra_file_data = extra_file_data[extra_file_data.pDockQ >= args.extra_cutoff]
 
             for _, r in extra_file_data.iterrows():
-                id1_kbid, id2_kbid = r['Name'].split('-', 1)
+                up1, up2 = r['NameUPAC'].split('-', 1)
                 score = r['pDockQ']
-
-                pair_score.append([id1_kbid, id2_kbid, score])
-                if 'ENSG' in id1_kbid and id1_kbid not in ensgs:
-                    ensgs.append(id1_kbid)
-                if 'ENSG' in id2_kbid and id2_kbid not in ensgs:
-                    ensgs.append(id2_kbid)
+                if "huri" in filename:
+                    ensg1, ensg2 = r['Name'].split('-', 1)
+                    pair_score.append([ensg1, ensg2, up1, up2, score])
+                else:
+                    pair_score.append([None, None, up1, up2, score])
             pairs_scores.append([extra_file, pair_score])
-
-        #convert ensg codes that passed cutoff check
-        ensg_dict = convert_ensg(ensgs)
 
         edf = []
         for target in targets:
             df_t = []
             for i, e_ps in enumerate(pairs_scores):
                 ex = e_ps[0]
+                ex_name = os.path.basename(ex).lower()
                 ps = e_ps[1]
                 for p in ps:
-                    id1_kbid = p[0]
-                    id2_kbid = p[1]
-                    id1_ensg = p[0]
-                    id2_ensg = p[1]
-                    score = p[2]
-
-                    if 'ENSG' in id1_kbid:
-                        id1_kbid = ensg_dict[id1_ensg]
-                    if 'ENSG' in id2_kbid:
-                        id2_kbid = ensg_dict[id2_ensg]
-
+                    ensg1, ensg2, up1, up2, score = p
                     g1 = 'extra gene'
                     g2 = 'extra gene'
-                    if id1_kbid == target:
-                        row = [id1_kbid, g1, id2_kbid, g2, 'na'] + ['na']*14
+                    if up1 == target:
+                        row = [up1, g1, up2, g2, 'na'] + ['na']*14
 
                         row = row + ['na']*i +[score]+['na']*(len(args.extra) -i -1)
 
                         extra_df.loc[len(extra_df)] = row
-                        copy_folder(ex, id1_ensg, id2_ensg, args.af)
-                        rename_folders_based_on_uniprot(ensg_dict)
-                    elif id2_kbid == target:
-                        row = [id2_kbid, g2, id1_kbid, g1, 'na'] + ['na']*14
+                        if "huri" in ex_name:
+                            copy_folder(ex, ensg1, ensg2, args.af)
+                            rename_pair_folder_direct(ensg1, ensg2, up1, up2)
+                        elif "humap" in ex_name:
+                            copy_folder(ex, up1, up2, args.af)
+
+                    elif up2 == target:
+                        row = [up2, g2, up1, g1, 'na'] + ['na']*14
 
                         row = row + ['na']*i +[score]+['na']*(len(args.extra) -i -1)
 
                         extra_df.loc[len(extra_df)] = row
-                        copy_folder(ex, id1_ensg, id2_ensg, args.af)
-                        rename_folders_based_on_uniprot(ensg_dict)
+                        if "huri" in ex_name:
+                            copy_folder(ex, ensg1, ensg2, args.af)
+                            rename_pair_folder_direct(ensg1, ensg2, up1, up2)
+                        elif "humap" in ex_name:
+                            copy_folder(ex, up1, up2, args.af)
                 df_t.append(extra_df)
                 extra_df = extra_df[0:0]
 
