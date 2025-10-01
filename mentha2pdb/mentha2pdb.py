@@ -1090,7 +1090,7 @@ def main(argv):
         dfxF.columns.values[-1] = new_last_column_name
         dfxF.columns.values[-2] = new_second_last_column_name
 
-        dfxF.sort_values(['target uniprot id', 'mentha score', 'PDB id'], ascending=False, inplace=True)
+        dfxF.sort_values(['target uniprot id', 'mentha score', 'interactor uniprot id', 'PDB id'], ascending=False, inplace=True)
         dfxF.replace(np.nan, 'na', inplace=True)
 
         csv_outname = args.o
