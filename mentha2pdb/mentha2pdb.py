@@ -834,16 +834,24 @@ def copy_folder(ex, id1, id2, af_folder_path):
 def rename_pair_folder_direct(ensg1, ensg2, up1, up2, base_path='AF_Huri_HuMAP'):
     
     huri_path = Path(base_path, 'Huri_dimers')
-
     old_folder = huri_path / f"{ensg1}-{ensg2}"
-    if not old_folder.exists():
-        raise FileNotFoundError(f"Expected old folder missing: {old_folder}")
     new_folder = huri_path / f"{up1}-{up2}"
-    if new_folder.exists():
-        raise FileExistsError(f"Target already exists: {new_folder}")
     
-    old_folder.rename(new_folder)
-    print(f"Renamed {old_folder} → {new_folder}")
+    try:
+        if not old_folder.exists():
+            raise FileNotFoundError(f"Expected old folder missing: {old_folder}")
+        if new_folder.exists():
+            raise FileExistsError(f"Target already exists: {new_folder}")
+        
+        old_folder.rename(new_folder)
+        print(f"Renamed {old_folder} → {new_folder}")
+
+    except FileNotFoundError as e:
+        print(f"ERROR: required folder not found.\n{e}", file=sys.stderr)
+        sys.exit(1)
+    except FileExistsError as e:
+        print(f"ERROR: output file(s) already exist — please remove them and try again.\n{e}", file=sys.stderr)
+        sys.exit(1)
 
 def process_extra_files(args, extra_files):
 
