@@ -18,61 +18,64 @@ Q9GZQ8,MAP1LC3B,Q9BQD3,KXD1,0.61,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956
 Q9GZQ8,MAP1LC3B,Q9Y383,LUC7L2,0.583,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 21900206 16169070 ,na,na
 Q9GZQ8,MAP1LC3B,Q9H8Y8,GORASP2,0.583,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 unassigned1304 ,na,na
 Q9GZQ8,MAP1LC3B,P46934,NEDD4,0.554,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 28085563 ,na,na
-Q9GZQ8,MAP1LC3B,Q86VP1,TAX1BP1,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,23209807 26451915 ,na,na
 Q9GZQ8,MAP1LC3B,Q8WYN0,ATG4A,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,20010802 ,na,na
+Q9GZQ8,MAP1LC3B,Q86VP1,TAX1BP1,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,23209807 26451915 ,na,na
 Q9GZQ8,MAP1LC3B,Q3MII6,TBC1D25,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,21383079 ,na,na
 Q9GZQ8,MAP1LC3B,Q12983,BNIP3,0.523,na,na,na,na,na,na,na,na,na,na,na,na,na,23209295 ,na,na
-Q9GZQ8,MAP1LC3B,P29590,PML,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,25419843 ,na,na
-Q9GZQ8,MAP1LC3B,Q15025,TNIP1,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 ,na,na
-Q9GZQ8,MAP1LC3B,Q8TD08,MAPK15,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,22948227 ,na,na
 Q9GZQ8,MAP1LC3B,Q9BXM7,PINK1,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,20153330 ,na,na
-Q9GZQ8,MAP1LC3B,Q13043,STK4,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q96EB6,SIRT1,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,18296641 ,na,na
-Q9GZQ8,MAP1LC3B,P68036,UBE2L3,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,24566975 ,na,na
-Q9GZQ8,MAP1LC3B,Q13188,STK3,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q8WWW0,RASSF5,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,O75143,ATG13,0.436,3WAO,yes,A;B;C;D,2;2;2;2,119;119;119;119,A;B;C;D,436;436;436;436,447;447;447;447,na,X-ray diffraction,2.6,0.0,0.0,20562859 23043107 ,na,na
+Q9GZQ8,MAP1LC3B,Q8TD08,MAPK15,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,22948227 ,na,na
+Q9GZQ8,MAP1LC3B,Q15025,TNIP1,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,25416956 ,na,na
+Q9GZQ8,MAP1LC3B,Q13188,STK3,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q13043,STK4,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,P68036,UBE2L3,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,24566975 ,na,na
+Q9GZQ8,MAP1LC3B,P29590,PML,0.454,na,na,na,na,na,na,na,na,na,na,na,na,na,25419843 ,na,na
 Q9GZQ8,MAP1LC3B,O75385,ULK1,0.436,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 23043107 ,na,na
+Q9GZQ8,MAP1LC3B,O75143,ATG13,0.436,3WAO,yes,A;B;C;D,2;2;2;2,119;119;119;119,A;B;C;D,436;436;436;436,447;447;447;447,na,X-ray diffraction,2.6,0.0,0.0,20562859 23043107 ,na,na
 Q9GZQ8,MAP1LC3B,Q15424,SAFB,0.416,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 21900206 ,na,na
 Q9GZQ8,MAP1LC3B,P05386,RPLP1,0.416,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 21900206 ,na,na
-Q9GZQ8,MAP1LC3B,P19474,TRIM21,0.396,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 26347139 ,na,na
+Q9GZQ8,MAP1LC3B,P78559,MAP1A,0.396,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 18083104 ,na,na
 Q9GZQ8,MAP1LC3B,P60520,GABARAPL2,0.396,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 24582747 ,na,na
 Q9GZQ8,MAP1LC3B,P46821,MAP1B,0.396,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 18083104 ,na,na
-Q9GZQ8,MAP1LC3B,P78559,MAP1A,0.396,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 18083104 ,na,na
+Q9GZQ8,MAP1LC3B,P19474,TRIM21,0.396,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 26347139 ,na,na
 Q9GZQ8,MAP1LC3B,Q9UPU7,TBC1D2B,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q00975,CACNA1B,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,24566975 ,na,na
-Q9GZQ8,MAP1LC3B,O75323,GBAS,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,P40939,HADHA,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q9UHC7,MKRN1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q9H7U1,CCSER2,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q9HAU5,UPF2,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,15231747 ,na,na
-Q9GZQ8,MAP1LC3B,Q9NYL9,TMOD3,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,O75323,GBAS,0.376,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q9Y605,MRFAP1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q9UHC7,MKRN1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q9UBC3,DNMT3B,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q9NYL9,TMOD3,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q9HAU5,UPF2,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,15231747 ,na,na
+Q9GZQ8,MAP1LC3B,Q9H7U1,CCSER2,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q9H2P0,ADNP,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q9BT49,THAP7,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q96PQ7,KLHL5,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q8NC44,FAM134A,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q8N6T3,ARFGAP1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
 Q9GZQ8,MAP1LC3B,Q6ZS17,FAM65A,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q16643,DBN1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q15545,TAF7,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q15059,BRD3,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q14790,CASP8,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q13685,AAMP,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q12929,EPS8,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,Q12824,SMARCB1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,P60896,SHFM1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,P47736,RAP1GAP,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,P35611,ADD1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,P10244,MYBL2,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
+Q9GZQ8,MAP1LC3B,P09496,CLTA,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
 Q9GZQ8,MAP1LC3B,P07108,DBI,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
 Q9GZQ8,MAP1LC3B,O75530,EED,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,P10244,MYBL2,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q8N6T3,ARFGAP1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q8NC44,FAM134A,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q9BT49,THAP7,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,P60896,SHFM1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q13685,AAMP,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q14790,CASP8,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q9H2P0,ADNP,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
 Q9GZQ8,MAP1LC3B,O60271,SPAG9,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,P09496,CLTA,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,P35611,ADD1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q15545,TAF7,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q12929,EPS8,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,P47736,RAP1GAP,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q12824,SMARCB1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q15059,BRD3,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q9UBC3,DNMT3B,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q16643,DBN1,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q96PQ7,KLHL5,0.332,na,na,na,na,na,na,na,na,na,na,na,na,na,21900206 ,na,na
-Q9GZQ8,MAP1LC3B,Q13618,CUL3,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,25684205 ,na,na
-Q9GZQ8,MAP1LC3B,Q8NFG4,FLCN,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,25126726 ,na,na
 Q9GZQ8,MAP1LC3B,Q9UHD2,TBK1,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,21617041 ,na,na
+Q9GZQ8,MAP1LC3B,Q8NFG4,FLCN,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,25126726 ,na,na
+Q9GZQ8,MAP1LC3B,Q13618,CUL3,0.309,na,na,na,na,na,na,na,na,na,na,na,na,na,25684205 ,na,na
+Q9GZQ8,MAP1LC3B,Q9NS23,RASSF1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q9H1Y0,ATG5,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q9GZZ9,UBA5,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q9GZQ8,MAP1LC3B,0.286,8YV6,na,A,1,125,A,1,125,A0A3S8TIH3,X-ray diffraction,1.75,0.0,0.0,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q9GZQ8,MAP1LC3B,0.286,8Q7K,na,A;B,1;1,125;125,A;B,1;1,125;125,Q8WZA9,X-ray diffraction,1.6,0.0,1.0,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q9GZQ8,MAP1LC3B,0.286,8Q53,na,A,1,125,A,1,125,na,X-ray diffraction,1.36,0.0,2.0,20562859 ,na,na
@@ -122,29 +125,26 @@ Q9GZQ8,MAP1LC3B,Q9GZQ8,MAP1LC3B,0.286,2ZJD,na,A;C,1;1,125;125,A;C,1;1,125;125,Q6
 Q9GZQ8,MAP1LC3B,Q9GZQ8,MAP1LC3B,0.286,2N9X,na,A,1,120,A,1,120,Q8IVP5,Solution NMR,na,0.0,0.0,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q9GZQ8,MAP1LC3B,0.286,2LUE,na,A,5,119,A,5,119,Q96CV9,Solution NMR,na,0.0,0.0,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q9GZQ8,MAP1LC3B,0.286,1V49,na,A,1,120,A,1,120,na,Solution NMR,na,0.0,0.0,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q9NS23,RASSF1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q8TC07,TBC1D15,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q14677,CLINT1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q2TAZ0,ATG2A,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q676U5,ATG16L1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q8TD19,NEK9,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q9GZZ9,UBA5,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q9H1Y0,ATG5,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q8TC07,TBC1D15,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q676U5,ATG16L1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q2TAZ0,ATG2A,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q14677,CLINT1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,P55769,NHP2L1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,21988832 ,na,na
 Q9GZQ8,MAP1LC3B,O95210,STBD1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,O00410,IPO5,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,P55769,NHP2L1,0.286,na,na,na,na,na,na,na,na,na,na,na,na,na,21988832 ,na,na
+Q9GZQ8,MAP1LC3B,Q9NX00,TMEM160,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q9H492,MAP1LC3A,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q9BPW8,NIPSNAP1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,Q8WZA9,IRGQ,0.236,8Q7K,na,A;B,1;1,125;125,C;D,417;417,425;425,na,X-ray diffraction,1.6,0.0,1.0,unassigned1304 ,na,na
 Q9GZQ8,MAP1LC3B,Q8NCE2,MTMR14,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,19590496 ,na,na
-Q9GZQ8,MAP1LC3B,Q14151,SAFB2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q14203,DCTN1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26638075 ,na,na
 Q9GZQ8,MAP1LC3B,Q14696,MESDC2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,unassigned1304 ,na,na
-Q9GZQ8,MAP1LC3B,P41743,PRKCI,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q14203,DCTN1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,26638075 ,na,na
+Q9GZQ8,MAP1LC3B,Q14151,SAFB2,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
 Q9GZQ8,MAP1LC3B,P55084,HADHB,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q9NX00,TMEM160,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q9BPW8,NIPSNAP1,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
-Q9GZQ8,MAP1LC3B,Q9H492,MAP1LC3A,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,P41743,PRKCI,0.236,na,na,na,na,na,na,na,na,na,na,na,na,na,20562859 ,na,na
+Q9GZQ8,MAP1LC3B,Q13137,CALCOCO2,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,25771791 ,na,na
+Q9GZQ8,MAP1LC3B,P42858,HTT,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,20417604 ,na,na
+Q9GZQ8,MAP1LC3B,P37840,SNCA,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,20417604 ,na,na
 Q9GZQ8,MAP1LC3B,P07550,ADRB2,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,25666616 ,na,na
 Q9GZQ8,MAP1LC3B,O60238,BNIP3L,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,20010802 ,na,na
-Q9GZQ8,MAP1LC3B,Q13137,CALCOCO2,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,25771791 ,na,na
-Q9GZQ8,MAP1LC3B,P37840,SNCA,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,20417604 ,na,na
-Q9GZQ8,MAP1LC3B,P42858,HTT,0.21,na,na,na,na,na,na,na,na,na,na,na,na,na,20417604 ,na,na

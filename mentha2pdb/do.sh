@@ -11,5 +11,5 @@ module load python/3.10
 #symbolic link to local version of Mentha to use
 ln -s /data/databases/mentha-20250428/2025-04-28
 
-python mentha2pdb.py -i 2025-04-28 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/HuRI.csv  /data/databases/AF_Huri_HuMAP/summary/humap.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
+python mentha2pdb.py -i 2025-04-28 -t target_uniprot_ID.txt -s 0.2 -o $1.csv -p -a  -extra /data/databases/AF_Huri_HuMAP/summary/huri_upac.csv  /data/databases/AF_Huri_HuMAP/summary/humap_upac.csv -af /data/databases/AF_Huri_HuMAP -ec 0.2
 
