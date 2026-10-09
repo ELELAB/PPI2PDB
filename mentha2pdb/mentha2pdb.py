@@ -119,7 +119,7 @@ def make_target_interactor_sequence_files(dataframe_out):
         if result is None:
             raise RuntimeError(f"UniRef API request failed for target {target} after retries.")
 
-        if not result.get('results'):
+        if result.get('results') is None:
             raise RuntimeError(f"No UniRef results found for target {target}.")
 
         target_sequence = ''
